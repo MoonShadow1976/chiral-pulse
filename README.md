@@ -9,6 +9,8 @@
 
 `dsh-plugin` · `deepseek-harness` · `ui-plugin` · `death-stranding` · `bb-pod` · `ecg` · `theme`
 
+![CHIRAL PULSE 新会话界面](assets/chiral-pulse-hero.png)
+
 ---
 
 ## 这是什么
