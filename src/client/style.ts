@@ -3,11 +3,11 @@
  *
  * LAYER 1 — the global skin. The whole app paints from `--dsw-*` variables
  * (ui-theme's design platform: alias tokens reference static tokens, so
- * remapping the static palette re-skins every component without touching its
- * structure). We remap the neutral-bluish scale to a DS blue-black (dark) or
- * container-sand (light), push hairline borders toward amber, tint hovers
- * with an amber bloom, and leave the deepseek brand blues untouched — the
- * whale mark stays DeepSeek blue.
+ * remapping the palette re-skins every component without touching its
+ * structure). This sheet FORCES the DS look under BOTH theme modes: a deep
+ * blue-black machine body, cold blue-grey hairlines, amber reserved for
+ * emphasis (the heartbeat waveform, hover blooms) — and the deepseek brand
+ * blues are left untouched, so the whale mark stays DeepSeek blue.
  *
  * LAYER 2 — the atmosphere. A fixed full-viewport CRT scanline weave, a
  * faint chiral lattice, and a vignette, all pointer-transparent. Plus the
@@ -21,85 +21,113 @@
 
 export const CHIRAL_CSS = `
 /* ────────────────────────────────────────────────────────────────────────
-   LAYER 1 · global DS skin — token remap
+   LAYER 1 · global DS skin — dark blue-black, both theme modes
    ──────────────────────────────────────────────────────────────────────── */
 
-/* Dark theme: DS blue-black machine body. */
-body[data-ds-dark-theme] {
-  --dsw-static-neutral-bluish-1000: rgb(13, 15, 19);
-  --dsw-static-neutral-bluish-950: rgb(5, 7, 10);
-  --dsw-static-neutral-bluish-900: rgb(8, 11, 15);
-  --dsw-static-neutral-bluish-875: rgb(10, 13, 18);
-  --dsw-static-neutral-bluish-850: rgb(12, 16, 22);
-  --dsw-static-neutral-bluish-800: rgb(15, 20, 27);
-  --dsw-static-neutral-bluish-750: rgb(19, 25, 33);
-  --dsw-static-neutral-bluish-700: rgb(23, 30, 40);
-  --dsw-static-neutral-bluish-600: rgb(66, 78, 92);
-  --dsw-static-neutral-bluish-500: rgb(96, 110, 126);
-  --dsw-static-neutral-bluish-400: rgb(122, 136, 152);
-  --dsw-static-neutral-bluish-300: rgb(158, 172, 186);
-  --dsw-static-neutral-bluish-250: rgb(177, 189, 201);
-  --dsw-static-neutral-bluish-200: rgb(190, 200, 210);
-  --dsw-static-neutral-bluish-150: rgb(205, 213, 221);
-  --dsw-static-neutral-bluish-100: rgb(218, 224, 230);
-  --dsw-static-neutral-bluish-75: rgb(228, 233, 238);
-  --dsw-static-neutral-bluish-60: rgb(234, 238, 242);
-  --dsw-static-neutral-bluish-50: rgb(239, 242, 245);
+/* Alias-level remap: independent of the static scale's role flip between
+   themes, so the DS look is identical under light and dark settings. */
+body[data-ds-dark-theme],
+body:not([data-ds-dark-theme]) {
+  /* machine body */
+  --dsw-alias-bg-base: rgb(5, 7, 10);
+  --dsw-alias-bg-layer-1: rgb(8, 11, 15);
+  --dsw-alias-bg-layer-2: rgb(10, 14, 20);
+  --dsw-alias-bg-layer-3: rgb(13, 18, 25);
+  --dsw-alias-bg-overlay: rgb(19, 25, 33);
+  --dsw-alias-bg-mask-1: rgba(0, 0, 0, 0.5);
+  --dsw-alias-bg-mask-2: rgba(0, 0, 0, 0.22);
+  --dsw-alias-bg-mask-3: rgba(0, 0, 0, 0.5);
+  --dsw-alias-bg-mask-drop: rgba(8, 11, 15, 0.72);
+  --dsw-alias-bg-skeleton: rgba(150, 170, 200, 0.06);
+
+  /* text: cold blue-grey */
+  --dsw-alias-label-primary: rgb(232, 237, 243);
+  --dsw-alias-label-secondary: rgb(168, 180, 195);
+  --dsw-alias-label-tertiary: rgb(124, 138, 156);
+  --dsw-alias-label-caption: rgb(104, 118, 136);
+  --dsw-alias-label-dimmed: rgb(88, 101, 118);
+  --dsw-alias-label-primary-dimmed: rgb(200, 208, 218);
+  --dsw-alias-label-primary-inverted: rgb(232, 237, 243);
+  --dsw-alias-label-primary-foreground: rgb(10, 14, 20);
+  --dsw-alias-brand-text: rgb(232, 237, 243);
+  --dsw-alias-brand-primary: rgb(103, 158, 254);
+
+  /* hairlines: cold blue, amber only as a faint blush */
+  --dsw-alias-border-l1: rgba(120, 150, 195, 0.12);
+  --dsw-alias-border-l2: rgba(120, 150, 195, 0.2);
+  --dsw-alias-border-l2-darkmode-thin: rgba(120, 150, 195, 0.16);
+  --dsw-alias-border-l3: rgba(120, 150, 195, 0.3);
+  --dsw-alias-border-l4: rgba(120, 150, 195, 0.4);
+  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.08);
+  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.1);
+
+  /* hovers: amber bloom, kept subtle */
+  --dsw-alias-interactive-bg-hover: rgba(255, 180, 84, 0.07);
+  --dsw-alias-interactive-bg-active: rgba(255, 180, 84, 0.11);
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 180, 84, 0.13);
+  --dsw-alias-interactive-bg-hover-solid: rgb(16, 22, 30);
+  --dsw-alias-interactive-bg-hover-danger: rgba(242, 90, 90, 0.14);
+
+  /* buttons: brand blue stays the primary action */
+  --dsw-alias-button-primary-dimmed: rgb(24, 32, 44);
+  --dsw-alias-button-primary-hover: rgb(124, 172, 255);
+  --dsw-alias-button-ghost-active-fill: rgb(16, 22, 30);
+  --dsw-alias-button-ghost-active-hover: rgb(20, 27, 37);
+  --dsw-alias-button-ghost-active-border: rgb(120, 150, 195);
+  --dsw-alias-button-floating-fill: rgb(13, 18, 25);
+  --dsw-alias-button-floating-hover: rgb(18, 24, 33);
+  --dsw-alias-button-elevated-fill: rgb(16, 22, 30);
+  --dsw-alias-button-contrast-fill: rgb(200, 208, 218);
+  --dsw-alias-button-tool-bar-fill: rgba(120, 150, 195, 0.22);
+  --dsw-alias-button-tool-bar-fill-invisible: rgba(120, 150, 195, 0.12);
+  --dsw-alias-button-tool-bar-hover: rgba(120, 150, 195, 0.3);
+
+  /* surfaces */
+  --dsw-specific-sidebar-fill: rgb(6, 9, 13);
+  --dsw-specific-sidebar-nav-item-active: rgb(16, 22, 30);
+  --dsw-specific-sidebar-nav-item-active-accent: rgb(22, 30, 41);
+  --dsw-specific-sidebar-nav-item-hover: rgb(12, 17, 24);
+  --dsw-specific-bubble: rgb(11, 15, 21);
+  --dsw-specific-bubble-highlight: rgb(16, 22, 30);
+  --dsw-specific-input-major: rgb(10, 14, 20);
+  --dsw-specific-login-input: rgb(8, 11, 16);
+  --dsw-specific-menu: rgb(13, 18, 25);
+  --dsw-specific-selector: rgb(15, 20, 28);
+  --dsw-specific-tip: rgb(10, 14, 20);
+  --dsw-alias-markdown-code-block: rgb(7, 10, 14);
+  --dsw-alias-markdown-code-block-banner: rgb(9, 12, 17);
+  --dsw-alias-markdown-inline-code: rgb(13, 18, 25);
+  --dsw-alias-markdown-code-segment-selected: rgb(10, 14, 20);
+  --dsw-alias-markdown-code-segment-unselected: rgb(8, 11, 16);
+  --dsw-alias-markdown-placeholder: rgb(10, 14, 20);
+  --dsw-alias-markdown-tag: rgb(13, 18, 25);
+  --dsw-alias-markdown-citation: rgb(16, 22, 30);
+
+  /* floats */
+  --dsw-alias-toast-bg: rgb(17, 23, 31);
+  --dsw-alias-tooltip-bg: rgb(15, 20, 28);
+  --dsw-alias-scrollbar-bg-l1: rgb(10, 14, 20);
+  --dsw-alias-scrollbar-bg-l2: rgb(13, 18, 25);
+  --dsw-alias-scrollbar-hover-l1: rgb(30, 38, 50);
+  --dsw-alias-scrollbar-hover-l2: rgb(38, 48, 63);
+
+  /* status: amber stays the warn/emphasis hue; success leans chiral cyan */
+  --dsw-alias-state-warn-primary: rgb(245, 158, 11);
+  --dsw-alias-state-warn-secondary: rgb(247, 173, 49);
+  --dsw-alias-state-warn-label: rgb(221, 134, 41);
+  --dsw-alias-state-warn-tertiary: rgb(39, 36, 31);
+  --dsw-alias-state-success-primary: rgb(52, 205, 168);
+  --dsw-alias-state-success-secondary: rgb(94, 222, 189);
+  --dsw-alias-state-success-tertiary: rgb(12, 28, 24);
   --dsw-static-green-400: rgb(94, 222, 189);
   --dsw-static-green-500: rgb(52, 205, 168);
-  --dsw-alias-border-l1: rgba(255, 180, 84, 0.10);
-  --dsw-alias-border-l2: rgba(255, 180, 84, 0.16);
-  --dsw-alias-border-l2-darkmode-thin: rgba(255, 180, 84, 0.12);
-  --dsw-alias-border-l3: rgba(255, 180, 84, 0.24);
-  --dsw-alias-border-l4: rgba(255, 180, 84, 0.32);
-  --dsw-alias-bg-skeleton: rgba(255, 180, 84, 0.05);
-  --dsw-alias-interactive-bg-hover: rgba(255, 180, 84, 0.07);
-  --dsw-alias-interactive-bg-active: rgba(255, 180, 84, 0.12);
-  --dsw-alias-interactive-bg-hover-accent: rgba(255, 180, 84, 0.14);
-  --dsw-alias-scrollbar-bg-l1: rgb(15, 20, 27);
-  --dsw-alias-scrollbar-bg-l2: rgb(19, 25, 33);
-  --dsw-alias-scrollbar-hover-l1: rgb(61, 47, 26);
-  --dsw-alias-scrollbar-hover-l2: rgb(74, 57, 31);
-}
-
-/* Light theme: sand-and-paper container yard (still DS). */
-body:not([data-ds-dark-theme]) {
-  --dsw-static-neutral-bluish-1000: rgb(10, 9, 8);
-  --dsw-static-neutral-bluish-950: rgb(14, 13, 11);
-  --dsw-static-neutral-bluish-900: rgb(20, 18, 16);
-  --dsw-static-neutral-bluish-875: rgb(29, 27, 24);
-  --dsw-static-neutral-bluish-850: rgb(35, 32, 28);
-  --dsw-static-neutral-bluish-800: rgb(43, 40, 34);
-  --dsw-static-neutral-bluish-750: rgb(53, 49, 42);
-  --dsw-static-neutral-bluish-700: rgb(66, 61, 52);
-  --dsw-static-neutral-bluish-600: rgb(91, 84, 72);
-  --dsw-static-neutral-bluish-500: rgb(130, 120, 104);
-  --dsw-static-neutral-bluish-400: rgb(157, 148, 127);
-  --dsw-static-neutral-bluish-300: rgb(196, 186, 164);
-  --dsw-static-neutral-bluish-250: rgb(207, 198, 178);
-  --dsw-static-neutral-bluish-200: rgb(216, 208, 191);
-  --dsw-static-neutral-bluish-150: rgb(224, 217, 201);
-  --dsw-static-neutral-bluish-100: rgb(231, 225, 212);
-  --dsw-static-neutral-bluish-75: rgb(236, 231, 219);
-  --dsw-static-neutral-bluish-60: rgb(241, 237, 226);
-  --dsw-static-neutral-bluish-50: rgb(244, 241, 232);
-  --dsw-static-neutral-bluish-00: rgb(249, 247, 240);
-  --dsw-alias-border-l1: rgba(176, 137, 66, 0.16);
-  --dsw-alias-border-l2: rgba(176, 137, 66, 0.24);
-  --dsw-alias-border-l2-darkmode-thin: rgba(176, 137, 66, 0.2);
-  --dsw-alias-border-l3: rgba(176, 137, 66, 0.3);
-  --dsw-alias-border-l4: rgba(176, 137, 66, 0.38);
-  --dsw-alias-bg-skeleton: rgba(176, 137, 66, 0.08);
-  --dsw-alias-interactive-bg-hover: rgba(176, 137, 66, 0.1);
-  --dsw-alias-interactive-bg-active: rgba(176, 137, 66, 0.16);
-  --dsw-alias-interactive-bg-hover-accent: rgba(176, 137, 66, 0.18);
 }
 
 /* Ambient bloom behind the app. */
 body {
   background-image:
-    radial-gradient(1100px 620px at 12% -8%, rgba(255, 180, 84, 0.05), transparent 60%),
-    radial-gradient(900px 560px at 108% 112%, rgba(111, 219, 226, 0.04), transparent 60%);
+    radial-gradient(1100px 620px at 12% -8%, rgba(111, 219, 226, 0.04), transparent 60%),
+    radial-gradient(900px 560px at 108% 112%, rgba(103, 158, 254, 0.05), transparent 60%);
   background-attachment: fixed;
 }
 
@@ -115,19 +143,19 @@ body {
 .cp-atmo-scanlines {
   background: repeating-linear-gradient(
     0deg,
-    rgba(255, 255, 255, 0.026) 0 1px,
+    rgba(255, 255, 255, 0.024) 0 1px,
     transparent 1px 3px
   );
   mix-blend-mode: overlay;
 }
 .cp-atmo-lattice {
-  opacity: 0.6;
+  opacity: 0.55;
   background:
-    repeating-linear-gradient(60deg, transparent 0 17px, rgba(255, 180, 84, 0.035) 17px 18px),
-    repeating-linear-gradient(120deg, transparent 0 17px, rgba(111, 219, 226, 0.03) 17px 18px);
+    repeating-linear-gradient(60deg, transparent 0 17px, rgba(103, 158, 254, 0.03) 17px 18px),
+    repeating-linear-gradient(120deg, transparent 0 17px, rgba(111, 219, 226, 0.028) 17px 18px);
 }
 .cp-atmo-vignette {
-  background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.22) 100%);
+  background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.24) 100%);
 }
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -144,16 +172,13 @@ body {
   height: 26px;
   margin: 3px 0 4px;
   padding: 0 10px;
-  border: 1px solid rgba(255, 180, 84, 0.14);
+  border: 1px solid rgba(120, 150, 195, 0.22);
   border-radius: 6px;
-  background: linear-gradient(180deg, rgba(255, 180, 84, 0.04), rgba(5, 7, 10, 0.55));
-  box-shadow: inset 0 0 16px rgba(255, 180, 84, 0.05);
+  background: linear-gradient(180deg, rgba(10, 14, 20, 0.9), rgba(5, 7, 10, 0.92));
+  box-shadow: inset 0 0 16px rgba(103, 158, 254, 0.06);
   color: #c9d3dc;
   font-family: ui-monospace, "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
   overflow: hidden;
-}
-body:not([data-ds-dark-theme]) .cp-line {
-  background: linear-gradient(180deg, rgba(176, 137, 66, 0.08), rgba(249, 247, 240, 0.6));
 }
 
 .cp-lineBpm {
