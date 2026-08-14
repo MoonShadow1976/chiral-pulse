@@ -3,7 +3,7 @@
 // Usage: node scripts/screenshot.cjs <out.png> [--new-session]
 const { createRequire } = require('node:module')
 const path = require('node:path')
-const req = createRequire('D:/deepseek-harness/node_modules/.pnpm/playwright-core@1.61.1/node_modules/playwright-core/package.json')
+const req = createRequire('D:/APP/deepseek-harness/node_modules/.pnpm/playwright-core@1.61.1/node_modules/playwright-core/package.json')
 const { chromium } = req('playwright-core')
 
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'

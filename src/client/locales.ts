@@ -12,7 +12,6 @@ export const NS = 'chiral'
 /** Dictionary keys of the `chiral` namespace (string-literal union). */
 export type ChiralKey =
   | 'line.aria'
-  | 'bpm.unit'
   | 'status.stable'
   | 'status.bonded'
   | 'status.chiral'
@@ -25,7 +24,6 @@ export type ChiralKey =
 /** English dictionary. */
 export const en: Record<ChiralKey, string> = {
   'line.aria': 'BB vital-signs strip — CHIRAL PULSE',
-  'bpm.unit': 'BPM',
   'status.stable': 'LINK STABLE',
   'status.bonded': 'BB BONDED',
   'status.chiral': 'CHIRAL DENSITY: NOMINAL',
@@ -39,7 +37,6 @@ export const en: Record<ChiralKey, string> = {
 /** Chinese dictionary. */
 export const zh: Record<ChiralKey, string> = {
   'line.aria': 'BB 生命体征走纸 — CHIRAL PULSE 手性脉冲',
-  'bpm.unit': '次/分',
   'status.stable': '链路稳定',
   'status.bonded': 'BB 连接完成',
   'status.chiral': '手性密度:正常',

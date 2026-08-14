@@ -4,7 +4,3 @@ lib/
 .DS_Store
 # Local-only typecheck config (absolute paths to a dev checkout) — never publish.
 tsconfig.local.json
-# Local-only apply smoke test (dev tooling) — never publish.
-scripts/smoke-apply.cjs
-# Local-only erase-bar verification harness (dev tooling) — never publish.
-scripts/verify-erasebar.cjs

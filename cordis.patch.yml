@@ -1,4 +1,4 @@
-# CHIRAL PULSE 鈥?BB pod vital-signs monitor.
+# CHIRAL PULSE — BB pod vital-signs monitor.
 #
 # This bundle patch adds the browser-roster row. The browser half of the
 # package is discovered through its package.json `dsh.client` declaration;
