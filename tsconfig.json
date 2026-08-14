@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": [],
+    "paths": {
+      "react": ["D:/deepseek-harness/node_modules/.pnpm/@types+react@18.3.31/node_modules/@types/react"],
+      "react/jsx-runtime": ["D:/deepseek-harness/node_modules/.pnpm/@types+react@18.3.31/node_modules/@types/react/jsx-runtime.d.ts"],
+      "@deepseek-ai/cordis": ["D:/deepseek-harness/vendor/cordis/lib/types/index.d.ts"],
+      "@deepseek-ai/dsh-client-runtime/client": ["D:/deepseek-harness/packages/client/runtime/lib/types/client/index.d.ts"],
+      "@deepseek-ai/dsh-client-ui-slots": ["D:/deepseek-harness/packages/client/ui-slots/lib/types/index.d.ts"],
+      "@deepseek-ai/dsh-client-locale/client": ["D:/deepseek-harness/packages/client/locale/lib/types/client/index.d.ts"],
+      "@deepseek-ai/dsh-client-ui-conversation/client": ["D:/deepseek-harness/packages/client/ui-conversation/lib/types/client/index.d.ts"],
+      "@deepseek-ai/dsh-client-web-react": ["D:/deepseek-harness/packages/client/web-react/lib/types/index.d.ts"],
+      "@deepseek-ai/dsh-session-stats/client": ["D:/deepseek-harness/packages/session/session-stats/src/client.ts"],
+      "@deepseek-ai/dsh-token-meter/client": ["D:/deepseek-harness/packages/llm/token-meter/src/client.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "tsdown.config.ts"]
+}
