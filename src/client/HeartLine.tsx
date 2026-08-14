@@ -33,8 +33,8 @@ export type HeartLineProps = PropsRuntime<'conversation.composer.dock'> & PropsL
 
 /** Monitor view height, user units (= CSS px). */
 const ECG_HEIGHT = 22
-/** Beats visible in the scrolling window. */
-const ECG_CYCLES = 2.5
+/** Seconds of signal shown across the window (fixed paper speed). */
+const ECG_WINDOW = 5
 /** Sampling step, user units. */
 const ECG_STEP = 2
 /** Activity window for the step-rate base, ms. */
@@ -56,6 +56,15 @@ const BOOST_RUNNING = 10
 /** BPM floor (a resting BB) and ceiling. */
 const BPM_FLOOR = 42
 const BPM_CEIL = 150
+
+/** Trace color by activity mode: idle amber, thinking cyan, tool orange, run warm. */
+const MODE_COLOR = {
+  idle: '#ffb454',
+  think: '#6fdbe2',
+  tool: '#ff7a4d',
+  run: '#ffc46b',
+} as const
+type Mode = keyof typeof MODE_COLOR
 
 /** HH:MM:SS with zero padding, DS countdown style. */
 function formatCountdown(totalSeconds: number): string {
@@ -94,7 +103,8 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const lastStepsRef = useRef(steps)
   const activityRef = useRef(activity)
   activityRef.current = activity
-  const [ui, setUi] = useState({ bpm: BPM_FLOOR, elapsed: 0 })
+  const modeRef = useRef<Mode>('idle')
+  const [ui, setUi] = useState({ bpm: BPM_FLOOR, elapsed: 0, mode: 'idle' as Mode })
   useEffect(() => {
     if (steps !== lastStepsRef.current) {
       lastStepsRef.current = steps
@@ -118,9 +128,12 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         + (act.running ? BOOST_RUNNING : 0)
       const target = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base + boost))
       bpmRef.current += (target - bpmRef.current) * 0.14
+      const mode: Mode = act.calls > 0 ? 'tool' : act.partial ? 'think' : act.running ? 'run' : 'idle'
+      modeRef.current = mode
       setUi(current => ({
         bpm: Math.round(bpmRef.current),
         elapsed: current.elapsed + 1,
+        mode,
       }))
     }, 1_000)
     return () => { window.clearInterval(id) }
@@ -148,9 +161,14 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     observer.observe(svg)
 
     const paint = (now: number): void => {
-      const frame = buildEcgFrame(now, bpmRef.current, widthRef.current, ECG_HEIGHT, ECG_CYCLES, ECG_STEP)
+      const frame = buildEcgFrame(now, bpmRef.current, widthRef.current, ECG_HEIGHT, ECG_WINDOW, ECG_STEP)
       lineRef.current?.setAttribute('points', frame.points)
       ghostRef.current?.setAttribute('points', frame.points)
+      // Trace color follows the live activity mode.
+      const stroke = MODE_COLOR[modeRef.current]
+      lineRef.current?.setAttribute('stroke', stroke)
+      headRef.current?.setAttribute('fill', stroke)
+      haloRef.current?.setAttribute('fill', `${stroke}33`)
       const headX = widthRef.current - 2
       const headY = frame.headY.toFixed(1)
       headRef.current?.setAttribute('cx', String(headX))
@@ -182,7 +200,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const flavor = STATUS_KEYS[Math.floor(ui.elapsed / STATUS_ROTATE_S) % STATUS_KEYS.length]
 
   return (
-    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse>
+    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode}>
       <div className="cp-lineBpm">
         {ui.bpm}
         <span className="cp-lineBpmUnit">{t('bpm.unit')}</span>

@@ -258,4 +258,177 @@ body {
     filter: drop-shadow(0 0 2px rgba(255, 180, 84, 0.6));
   }
 }
+
+/* ────────────────────────────────────────────────────────────────────────
+   ECG paper grid + activity-mode color coupling
+   ──────────────────────────────────────────────────────────────────────── */
+.cp-lineEcg {
+  border-radius: 4px;
+  border: 1px solid rgba(120, 150, 195, 0.14);
+  background:
+    repeating-linear-gradient(0deg, rgba(120, 150, 195, 0.06) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, rgba(120, 150, 195, 0.05) 0 1px, transparent 1px 11px),
+    rgba(5, 7, 10, 0.5);
+}
+.cp-line[data-mode="think"] .cp-lineBpm {
+  color: #7fe3e8;
+  text-shadow: 0 0 10px rgba(111, 219, 226, 0.55);
+}
+.cp-line[data-mode="tool"] .cp-lineBpm {
+  color: #ff9b7a;
+  text-shadow: 0 0 10px rgba(255, 122, 77, 0.6);
+}
+.cp-line[data-mode="run"] .cp-lineBpm {
+  color: #ffd9a0;
+}
+.cp-line[data-mode="think"] .cp-lineStatus,
+.cp-line[data-mode="tool"] .cp-lineStatus {
+  color: #9fe8ec;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Message-flow dressing — DS glyphs on each node kind
+   ──────────────────────────────────────────────────────────────────────── */
+[data-chat-flow-kind] {
+  position: relative;
+}
+[data-chat-flow-kind="assistant"] {
+  padding-left: 18px;
+}
+[data-chat-flow-kind="assistant"]::before {
+  content: "✦";
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  color: rgba(255, 180, 84, 0.85);
+  font-size: 11px;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(255, 180, 84, 0.6);
+}
+[data-chat-flow-kind="assistant"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255, 180, 84, 0.35), transparent);
+}
+[data-chat-flow-kind="user"],
+[data-chat-flow-kind="steering"] {
+  padding-right: 18px;
+}
+[data-chat-flow-kind="user"]::before,
+[data-chat-flow-kind="steering"]::before {
+  content: "▸▸";
+  position: absolute;
+  right: 2px;
+  top: 4px;
+  color: rgba(120, 150, 195, 0.75);
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: -1px;
+}
+[data-chat-flow-kind="context"] {
+  padding-left: 16px;
+}
+[data-chat-flow-kind="context"]::before {
+  content: "⇢";
+  position: absolute;
+  left: 1px;
+  top: 2px;
+  color: rgba(111, 219, 226, 0.7);
+  font-size: 11px;
+  line-height: 1;
+}
+[data-variant="think"] {
+  border-left: 2px solid rgba(111, 219, 226, 0.35);
+  padding-left: 10px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Tool-card chassis — the ui-primitives block family gets a DS case
+   ──────────────────────────────────────────────────────────────────────── */
+[data-tool],
+[data-search],
+[data-read],
+[data-web],
+[data-diff],
+[data-terminal],
+[data-context-injection-body] {
+  border: 1px solid rgba(120, 150, 195, 0.22) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(180deg, rgba(11, 15, 21, 0.86), rgba(6, 9, 13, 0.9)) !important;
+  box-shadow: inset 0 0 18px rgba(103, 158, 254, 0.05);
+  position: relative;
+}
+[data-terminal]::before {
+  content: "❯_";
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  color: rgba(111, 219, 226, 0.35);
+  font-size: 10px;
+  font-family: ui-monospace, Consolas, monospace;
+}
+[data-read]::before {
+  content: "▤";
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  color: rgba(120, 150, 195, 0.4);
+  font-size: 11px;
+}
+[data-search]::before {
+  content: "⌕";
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  color: rgba(255, 180, 84, 0.4);
+  font-size: 13px;
+}
+[data-web]::before {
+  content: "⌖";
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  color: rgba(111, 219, 226, 0.4);
+  font-size: 12px;
+}
+[data-diff]::before {
+  content: "⇄";
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  color: rgba(120, 150, 195, 0.4);
+  font-size: 12px;
+}
+[data-tool]::before {
+  content: "⚙";
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  color: rgba(255, 180, 84, 0.4);
+  font-size: 11px;
+}
+[data-context-injection-body]::before {
+  content: "⇢";
+  position: absolute;
+  right: 8px;
+  top: 5px;
+  color: rgba(111, 219, 226, 0.4);
+  font-size: 11px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Composer details
+   ──────────────────────────────────────────────────────────────────────── */
+[data-composer-seat] textarea {
+  caret-color: #ffb454;
+  letter-spacing: 0.01em;
+}
+[data-composer-seat] textarea:focus {
+  caret-color: #ffd9a0;
+}
+
 `

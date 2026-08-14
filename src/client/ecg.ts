@@ -41,11 +41,18 @@ export interface EcgFrame {
 
 /**
  * Build the polyline points for the scrolling window.
- * @param nowMs - wall-clock sample time (drives the phase clock).
- * @param bpm - current heart rate (phase clock speed).
+ *
+ * Hospital monitor semantics: the paper moves at a FIXED speed — every pixel
+ * represents a fixed amount of wall-clock time, so the trace scrolls left at
+ * a constant rate regardless of heart rate. What changes with BPM is the
+ * density of QRS complexes across that fixed window: a fast heart packs more
+ * beats onto the screen, a resting one spaces them out.
+ *
+ * @param nowMs - wall-clock sample time (drives the scan).
+ * @param bpm - current heart rate (beat density only; never the scan speed).
  * @param width - view width in user units (x spans 0..width).
  * @param height - view height in user units.
- * @param cycles - how many beats the window shows.
+ * @param windowSeconds - how many seconds of signal the window shows.
  * @param step - x sampling step in user units.
  * @returns the frame.
  */
@@ -54,18 +61,26 @@ export function buildEcgFrame(
   bpm: number,
   width: number,
   height: number,
-  cycles: number,
+  windowSeconds: number,
   step = 2,
 ): EcgFrame {
   const mid = height / 2
   const amp = height * 0.44
-  const beat = (nowMs / 1_000) * (bpm / 60)
-  const headPhase = beat % 1
+  // Fixed paper speed: seconds per user-unit pixel.
+  const secondsPerPixel = windowSeconds / width
+  const tNow = nowMs / 1_000
+  // Slow baseline wander, like a real monitor: two incommensurate sines keep
+  // the resting trace from freezing into a straight flatline.
+  const wander = 0.05 * Math.sin(tNow * 0.6)
+    + 0.035 * Math.sin(tNow * 1.7 + 1.3)
   const points: string[] = []
   let headY = mid
   for (let x = 0; x <= width; x += step) {
-    const phase = ((headPhase - ((width - x) / width) * cycles) % 1 + 1) % 1
-    const y = mid - ecgValue(phase) * amp
+    // x → absolute time: the right edge is "now", leftward is the past at a
+    // constant rate.
+    const tX = tNow - (width - x) * secondsPerPixel
+    const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
+    const y = mid - (ecgValue(phase) + wander) * amp
     points.push(`${x.toFixed(1)},${y.toFixed(1)}`)
     if (x === width - step) headY = y
   }
