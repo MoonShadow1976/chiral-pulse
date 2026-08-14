@@ -3,11 +3,11 @@
  * vital-signs strip under the composer stats.
  *
  * Two contributions:
- *  1. The global DS skin — a `--dsw-*` token remap (blue-black machine body,
+ *  1. The global DS skin 鈥?a `--dsw-*` token remap (blue-black machine body,
  *     amber hairlines, sand-paper light variant), the DeepSeek whale mark's
  *     brand blues untouched, plus three pointer-transparent atmosphere
  *     overlays (CRT scanlines, chiral lattice, vignette).
- *  2. The heartbeat strip on `conversation.composer.dock` — a 26px monitor
+ *  2. The heartbeat strip on `conversation.composer.dock` 鈥?a 26px monitor
  *     paper feed whose scrolling ECG is the hero and whose BPM follows the
  *     session's live activity (model streaming, tools executing).
  *
@@ -49,7 +49,7 @@ export function apply(ctx: ClientContext): void {
 
   ctx.effect(() => {
     const tag = document.createElement('style')
-    tag.dataset.plugin = '@dsh-plugins/chiral-pulse'
+    tag.dataset.plugin = 'chiral-pulse'
     tag.textContent = CHIRAL_CSS
     document.head.appendChild(tag)
     return () => { tag.remove() }

@@ -22,7 +22,7 @@ global.document = fakeDocument
 
 const m = require('D:/style/lib/client.js')
 console.log('registered:', captured.map(c => c.id))
-const rec = captured.find(c => c.id === '@dsh-plugins/chiral-pulse')
+const rec = captured.find(c => c.id === 'chiral-pulse')
 if (!rec) { console.error('FACTORY NOT REGISTERED'); process.exit(1) }
 
 // Resolve platform modules the way the loader module table would: through a
@@ -44,7 +44,7 @@ const ctx = {
 }
 try {
   exports_.apply(ctx)
-  console.log('APPLY OK — slots:', registeredSlots.length, 'effects:', effects.length, 'style tags:', elements.filter(e => e.tagName).length)
+  console.log('APPLY OK 鈥?slots:', registeredSlots.length, 'effects:', effects.length, 'style tags:', elements.filter(e => e.tagName).length)
 } catch (error) {
   console.error('APPLY THREW:', error)
   process.exit(1)

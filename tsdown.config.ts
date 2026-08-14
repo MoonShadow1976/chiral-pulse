@@ -1,17 +1,16 @@
 /**
- * CHIRAL PULSE — out-of-tree client plugin build.
+ * CHIRAL PULSE 鈥?out-of-tree client plugin build.
  *
  * Emits the two artifacts a dual-face plugin package needs:
- *  - lib/index.js   — the node half: an empty `apply` so the package can be a
+ *  - lib/index.js   鈥?the node half: an empty `apply` so the package can be a
  *                     row in the host loader tree (the browser half is
  *                     discovered through the package.json `dsh.client`).
- *  - lib/client.js  — the browser half: a lazy-CJS closure factory registered
+ *  - lib/client.js  鈥?the browser half: a lazy-CJS closure factory registered
  *                     via window.__ModuleLoader__.load({ id, factory }).
  *
  * The client bundle contract mirrors the in-repo shared preset
  * (packages/client/tsdown.client.ts in the deepseek-harness checkout):
- * externals resolve through the injected require (the loader module table —
- * the platform seed list), everything else must inline, and the banner/footer
+ * externals resolve through the injected require (the loader module table 鈥? * the platform seed list), everything else must inline, and the banner/footer
  * pair wraps the factory. Never import another plugin package by value: the
  * module table cannot answer it. Type-only imports are erased and never reach
  * this artifact.
@@ -32,7 +31,7 @@ const PLATFORM_MODULES = [
   '@deepseek-ai/dsh-client-schema-form',
 ] as const
 
-const PLUGIN_ID = '@dsh-plugins/chiral-pulse'
+const PLUGIN_ID = 'chiral-pulse'
 
 export default defineConfig([
   // Node half: the host loader mounts the package as an ordinary entry.
@@ -59,7 +58,7 @@ export default defineConfig([
     dts: false,
     clean: false,
     // Only the platform seed stays external (the loader module table answers
-    // its require); everything else the bundle touches must inline — no
+    // its require); everything else the bundle touches must inline 鈥?no
     // shared identity outside the module table.
     deps: {
       neverBundle: [...PLATFORM_MODULES],

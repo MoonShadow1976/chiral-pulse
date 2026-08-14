@@ -100,7 +100,11 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const steps = stats?.steps ?? 0
 
   // ── BPM engine: step-window base + live activity boost ────────────────
+  // targetRef updates once per second (activity readout); bpmRef eases toward
+  // it EVERY FRAME inside paint, so the trace phase never jumps — a stepped
+  // BPM would snap the whole waveform sideways at every tick.
   const bpmRef = useRef(BPM_FLOOR)
+  const targetRef = useRef(BPM_FLOOR)
   const samplesRef = useRef<StepSample[]>([])
   const lastStepsRef = useRef(steps)
   const liveRef = useRef(live)
@@ -128,8 +132,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const boost = (act.toolName !== null ? BOOST_TOOL : 0)
         + (act.partial ? BOOST_THINKING : 0)
         + (act.running ? BOOST_RUNNING : 0)
-      const target = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base + boost))
-      bpmRef.current += (target - bpmRef.current) * 0.14
+      targetRef.current = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base + boost))
       const mode: Mode = act.toolName !== null ? 'tool' : act.partial ? 'think' : act.running ? 'run' : 'idle'
       modeRef.current = mode
       setUi(current => ({
@@ -170,7 +173,14 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     })
     observer.observe(canvas)
 
+    let lastBpmFrame = 0
     const paint = (now: number): void => {
+      // Frame-rate BPM easing: the target updates once per second, but the
+      // trace phase must move continuously or the whole waveform snaps.
+      if (lastBpmFrame === 0) lastBpmFrame = now
+      const dt = (now - lastBpmFrame) / 1_000
+      lastBpmFrame = now
+      bpmRef.current += (targetRef.current - bpmRef.current) * Math.min(1, dt * 0.8)
       const c = canvasRef.current
       const g = ctxRef.current
       if (c === null || g === null) return

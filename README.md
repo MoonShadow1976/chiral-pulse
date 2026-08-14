@@ -50,7 +50,7 @@ BPM 目标用 lerp 平滑——思考一开始,脉搏立刻拉高;工作落地,�
 ### 发布后（推荐）
 
 ```sh
-dsh plugin --profile web @dsh-plugins/chiral-pulse
+dsh plugin --profile web chiral-pulse
 ```
 
 该包同时声明 `dsh.bundle`(内含 `cordis.patch.yml` roster 行)与
@@ -65,7 +65,7 @@ bundle 层,无需手写配置。
 ```yaml
 - insert:
     - id: ui-chiral-pulse
-      name: '@dsh-plugins/chiral-pulse'
+      name: 'chiral-pulse'
 ```
 
 ```powershell
@@ -78,7 +78,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modul
 ### 卸载
 
 从 profile patch 中移除该行并删除 junction;发布版则
-`dsh plugin --profile web remove @dsh-plugins/chiral-pulse`。
+`dsh plugin --profile web remove chiral-pulse`。
 
 ## 构建
 
