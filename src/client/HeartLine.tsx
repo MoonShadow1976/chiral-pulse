@@ -34,13 +34,13 @@ export type HeartLineProps = PropsRuntime<'conversation.input.dock'> & PropsLoca
 /** Monitor view height, CSS px. */
 const ECG_HEIGHT = 22
 /**
- * Seconds of signal shown across the window — the FIXED paper speed. The
- * trace always scrolls one window width per this many seconds, regardless of
- * heart rate; BPM only changes how many beats fit in the window (42 BPM ≈ 7
- * beats, 90 BPM ≈ 15). 10s reads like a hospital monitor; shorter windows
- * look like fast-moving clutter.
+ * FIXED paper speed in px/second — the real hospital-monitor invariant.
+ * The trace scrolls at this absolute rate no matter the strip width; the
+ * width only decides how much history fits on screen. A rate change (42→90)
+ * therefore only densifies the beats — it never speeds the paper up, and
+ * resizing the window cannot make the trace run faster either.
  */
-const ECG_WINDOW = 10
+const PAPER_SPEED_PX_PER_SECOND = 30
 /** Activity window for the step-rate base, ms. */
 const ACTIVITY_WINDOW_MS = 10_000
 /** Rotating status lines (locale keys), one every STATUS_ROTATE_S ticks. */
@@ -58,6 +58,13 @@ const BOOST_RUNNING = 10
 /** BPM floor (a resting BB) and ceiling. */
 const BPM_FLOOR = 42
 const BPM_CEIL = 150
+/**
+ * How fast the displayed heart rate ramps toward its target, in BPM/second.
+ * A hospital monitor updates its HR figure on a ~2-3s rolling average and
+ * the trace follows gradually — the rate change reads as a slow ramp, not a
+ * snap: 42 → 90 takes (90-42)/6 = 8 seconds of visible densification.
+ */
+const BPM_RAMP_PER_SECOND = 6
 
 /** Trace color by activity mode: idle amber, thinking cyan, tool orange, run warm. */
 const MODE_COLOR = {
@@ -181,14 +188,29 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     })
     observer.observe(canvas)
 
-    let lastBpmFrame = 0
+    // Smooth display clock: the trace advances at most CLAMP_PER_FRAME worth
+    // of time per frame, so a busy main thread (streaming markdown, mode
+    // switches) that delays rAF can never make the paper jump forward.
+    let displayNow = 0
+    let lastPaintReal = 0
+    const MAX_FRAME_SECONDS = 0.1
     const paint = (now: number): void => {
-      // Frame-rate BPM easing: the target updates once per second, but the
-      // trace phase must move continuously or the whole waveform snaps.
-      if (lastBpmFrame === 0) lastBpmFrame = now
-      const dt = (now - lastBpmFrame) / 1_000
-      lastBpmFrame = now
-      bpmRef.current += (targetRef.current - bpmRef.current) * Math.min(1, dt * 0.8)
+      if (lastPaintReal === 0) {
+        lastPaintReal = now
+        displayNow = now
+      }
+      const realDt = Math.max(0, (now - lastPaintReal) / 1_000)
+      lastPaintReal = now
+      const dt = Math.min(realDt, MAX_FRAME_SECONDS)
+      displayNow += dt * 1_000
+      // Constant-rate ramp (hospital monitor cadence): the rate eases toward
+      // its target at BPM_RAMP_PER_SECOND, so a rate change takes seconds and
+      // the beat spacing visibly densifies beat by beat.
+      const diff = targetRef.current - bpmRef.current
+      const step = BPM_RAMP_PER_SECOND * dt
+      if (diff > step) bpmRef.current += step
+      else if (diff < -step) bpmRef.current -= step
+      else bpmRef.current = targetRef.current
       const c = canvasRef.current
       const g = ctxRef.current
       if (c === null || g === null) return
@@ -210,8 +232,9 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, w, h)
 
-      const tNow = now / 1_000
-      const secondsPerPixel = ECG_WINDOW / w
+      const tNow = displayNow / 1_000
+      // Absolute paper speed: px per second is constant, width-independent.
+      const secondsPerPixel = 1 / PAPER_SPEED_PX_PER_SECOND
       const mid = h / 2
       const amp = h * 0.44
       const wander = 0.05 * Math.sin(tNow * 0.6) + 0.035 * Math.sin(tNow * 1.7 + 1.3)
@@ -286,7 +309,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         : t(flavor)
 
   return (
-    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode}>
+    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode} data-rev="8">
       <div className="cp-lineBpm">
         {ui.bpm}
         <span className="cp-lineBpmUnit">{t('bpm.unit')}</span>
