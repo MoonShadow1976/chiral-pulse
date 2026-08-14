@@ -69,7 +69,7 @@ bundle 层,无需手写配置。
 ```
 
 ```powershell
-New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modules\@dsh-plugins\chiral-pulse" -Target "D:\path\to\chiral-pulse"
+New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modules\chiral-pulse" -Target "D:\path\to\chiral-pulse"
 ```
 
 用户 patch 层是热加载的:无需重启 `dsh web`。之后**刷新浏览器页面**即可
