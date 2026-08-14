@@ -22,12 +22,16 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
-      # tsdown is fetched by npx on the fly — `npm install tsdown` would
-      # resolve the whole dependency tree, and the workspace-scoped
-      # @deepseek-ai devDependencies (type-check references) use the
-      # pnpm-only `workspace:` protocol, which npm cannot resolve.
+      # tsdown must resolve from the project's node_modules (tsdown.config.ts
+      # imports 'tsdown'), so install it for real. `npm install` would try to
+      # resolve the whole dependency tree first — drop the workspace-scoped
+      # @deepseek-ai devDependencies (type-check references, pnpm-only
+      # `workspace:` protocol) from this job's copy of package.json first.
       - name: Build client bundle
-        run: npx --yes tsdown@0.22.2
+        run: |
+          npm pkg delete devDependencies
+          npm install --no-save --no-audit --no-fund tsdown@0.22.2
+          npx tsdown
 
       - name: Publish to npm
         run: npm publish --access public
