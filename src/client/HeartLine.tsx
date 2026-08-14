@@ -72,6 +72,7 @@ const MODE_COLOR = {
   think: '#6fdbe2',
   tool: '#ff7a4d',
   run: '#ffc46b',
+  flat: '#c0483c',
 } as const
 type Mode = keyof typeof MODE_COLOR
 
@@ -108,6 +109,10 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     toolName: s.runningCalls[0]?.name ?? null,
     running: s.running,
     error: s.lastAgentError,
+    // A failed step waiting on a model retry: the whale flatlines.
+    retrying: s.chat.legacy.nodes.some(
+      n => n.kind === 'model-retry' && n.retryState === 'scheduled',
+    ),
   }))
 
   const steps = stats?.steps ?? 0
@@ -142,11 +147,18 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const perMinute = span > 0 ? (delta / span) * 60_000 : 0
       const base = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, 42 + perMinute * 6))
       const act = liveRef.current
-      const boost = (act.toolName !== null ? BOOST_TOOL : 0)
-        + (act.partial ? BOOST_THINKING : 0)
-        + (act.running ? BOOST_RUNNING : 0)
-      targetRef.current = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base + boost))
-      const mode: Mode = act.toolName !== null ? 'tool' : act.partial ? 'think' : act.running ? 'run' : 'idle'
+      // Retry stall → flatline: target 0, the trace flattens and the whale's
+      // heart stops until the retry starts.
+      targetRef.current = act.retrying
+        ? 0
+        : Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base
+          + (act.toolName !== null ? BOOST_TOOL : 0)
+          + (act.partial ? BOOST_THINKING : 0)
+          + (act.running ? BOOST_RUNNING : 0)))
+      const mode: Mode = act.retrying ? 'flat'
+        : act.toolName !== null ? 'tool'
+          : act.partial ? 'think'
+            : act.running ? 'run' : 'idle'
       modeRef.current = mode
       setUi(current => ({
         bpm: Math.round(bpmRef.current),
@@ -193,7 +205,14 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     // switches) that delays rAF can never make the paper jump forward.
     let displayNow = 0
     let lastPaintReal = 0
-    const MAX_FRAME_SECONDS = 0.1
+    // Refresh-synced display clock. Each NORMAL frame advances the trace by
+    // exactly that frame's real interval — the paper speed is then a constant
+    // 1× by construction, with zero lag. A DELAYED frame (busy main thread)
+    // reuses the last normal interval instead, so the trace never jumps, just
+    // runs a touch slow and resumes. No averaging: a smoothed period lags
+    // frame-rate changes and the speed visibly surges when the frame rate
+    // recovers (the "left edge accelerates then settles" artifact).
+    let framePeriodMs = 16.7
     const paint = (now: number): void => {
       if (lastPaintReal === 0) {
         lastPaintReal = now
@@ -201,7 +220,8 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       }
       const realDt = Math.max(0, (now - lastPaintReal) / 1_000)
       lastPaintReal = now
-      const dt = Math.min(realDt, MAX_FRAME_SECONDS)
+      if (realDt > 0 && realDt < 0.05) framePeriodMs = realDt * 1_000
+      const dt = framePeriodMs / 1_000
       displayNow += dt * 1_000
       // Constant-rate ramp (hospital monitor cadence): the rate eases toward
       // its target at BPM_RAMP_PER_SECOND, so a rate change takes seconds and
@@ -239,28 +259,48 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const amp = h * 0.44
       const wander = 0.05 * Math.sin(tNow * 0.6) + 0.035 * Math.sin(tNow * 1.7 + 1.3)
       const bpm = bpmRef.current
+      const flatline = bpm < 1
       const yAt = (x: number): number => {
-        const tX = tNow - (w - x) * secondsPerPixel
-        const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
-        return mid - (ecgValue(phase) + wander) * amp
+        if (flatline) return mid // the whale's heart has stopped — a flat line
+        // Sub-pixel peak guard: at 30px/s and high BPM the R spike is a
+        // fraction of a pixel wide, so per-pixel sampling would shave the
+        // apex and the trace would visibly "shrink" toward the midline as
+        // the rate rises. Sample 4 sub-points per pixel and keep the peak.
+        let v = -Infinity
+        for (let i = 0; i < 4; i += 1) {
+          const tX = tNow - (w - (x + i * 0.25)) * secondsPerPixel
+          const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
+          const s = ecgValue(phase)
+          if (s > v) v = s
+        }
+        return mid - (v + wander) * amp
       }
+
+      // Sweep (erase-bar) mode, like a real bedside monitor: a bright vertical
+      // bar sweeps right → left; the area it has passed shows the freshly
+      // recorded trace, the un-swept area stays blank. The trace never
+      // scrolls, so there is no exit-rate artifact at all.
+      const period = w / PAPER_SPEED_PX_PER_SECOND
+      const scanT = (displayNow / 1_000) % period
+      const scanX = w - scanT * PAPER_SPEED_PX_PER_SECOND
+      const startX = Math.max(0, Math.ceil(scanX))
 
       // Chiral ghost: the same trace offset by 3px, faint cyan.
       g.beginPath()
-      for (let x = 0; x <= w; x += 1) {
+      for (let x = startX; x <= w; x += 1) {
         const y = yAt(x)
-        if (x === 0) g.moveTo(x + 3, y)
+        if (x === startX) g.moveTo(x + 3, y)
         else g.lineTo(x + 3, y)
       }
       g.strokeStyle = 'rgba(111, 219, 226, 0.18)'
       g.lineWidth = 1
       g.stroke()
 
-      // Main trace.
+      // Fresh trace: the swept region.
       g.beginPath()
-      for (let x = 0; x <= w; x += 1) {
+      for (let x = startX; x <= w; x += 1) {
         const y = yAt(x)
-        if (x === 0) g.moveTo(x, y)
+        if (x === startX) g.moveTo(x, y)
         else g.lineTo(x, y)
       }
       g.strokeStyle = MODE_COLOR[modeRef.current]
@@ -269,17 +309,11 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       g.lineCap = 'round'
       g.stroke()
 
-      // Scan head: halo + dot at the leading edge.
-      const headY = yAt(w)
-      g.fillStyle = MODE_COLOR[modeRef.current]
-      g.globalAlpha = 0.22
-      g.beginPath()
-      g.arc(w - 2, headY, 5, 0, Math.PI * 2)
-      g.fill()
-      g.globalAlpha = 1
-      g.beginPath()
-      g.arc(w - 2, headY, 1.6, 0, Math.PI * 2)
-      g.fill()
+      // The sweep bar itself: bright core + soft halo.
+      g.fillStyle = 'rgba(255, 180, 84, 0.16)'
+      g.fillRect(scanX - 5, 0, 10, h)
+      g.fillStyle = 'rgba(255, 224, 190, 0.95)'
+      g.fillRect(scanX - 1, 0, 2, h)
     }
 
     if (reduced) {
@@ -302,17 +336,18 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const flavor = STATUS_KEYS[Math.floor(ui.elapsed / STATUS_ROTATE_S) % STATUS_KEYS.length]
   const status = live.error !== null
     ? `⚠ ${live.error.slice(0, 16)}`
-    : live.toolName !== null
-      ? `EXEC · ${live.toolName}`
-      : live.partialText !== ''
-        ? `⇢ ${live.partialText.slice(-18)}`
-        : t(flavor)
+    : live.retrying
+      ? t('status.flatline')
+      : live.toolName !== null
+        ? `EXEC · ${live.toolName}`
+        : live.partialText !== ''
+          ? `⇢ ${live.partialText.slice(-18)}`
+          : t(flavor)
 
   return (
-    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode} data-rev="8">
+    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode} data-rev="18">
       <div className="cp-lineBpm">
         {ui.bpm}
-        <span className="cp-lineBpmUnit">{t('bpm.unit')}</span>
       </div>
 
       <div className="cp-lineEcgWrap">
