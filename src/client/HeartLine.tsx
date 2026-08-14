@@ -68,6 +68,18 @@ interface StepSample {
   steps: number
 }
 
+/** Tail of the model's in-flight output: last non-empty text/reasoning block, whitespace-flattened. */
+function streamingTail(blocks: readonly { kind: string; text?: string }[]): string {
+  for (let i = blocks.length - 1; i >= 0; i -= 1) {
+    const block = blocks[i]
+    const text = block.text
+    if (text !== undefined && text.trim() !== '') {
+      return text.replace(/\s+/g, ' ').trim()
+    }
+  }
+  return ''
+}
+
 /**
  * The CHIRAL PULSE dock entry.
  * @param props - runtime seat (useSession, useProjection) plus the locale seat.
@@ -75,11 +87,14 @@ interface StepSample {
  */
 export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const stats = useProjection('sessionStats') as SessionProjectionMap['sessionStats'] | undefined
-  // Live activity: model streaming, tools executing, turn in flight.
-  const activity = useSession(s => ({
+  // Live activity + real model state: streaming output tail, running tool
+  // name, turn in flight, and the last agent error.
+  const live = useSession(s => ({
     partial: s.partial !== null,
-    calls: s.runningCalls.length,
+    partialText: s.partial === null ? '' : streamingTail(s.partial.blocks),
+    toolName: s.runningCalls[0]?.name ?? null,
     running: s.running,
+    error: s.lastAgentError,
   }))
 
   const steps = stats?.steps ?? 0
@@ -88,8 +103,8 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const bpmRef = useRef(BPM_FLOOR)
   const samplesRef = useRef<StepSample[]>([])
   const lastStepsRef = useRef(steps)
-  const activityRef = useRef(activity)
-  activityRef.current = activity
+  const liveRef = useRef(live)
+  liveRef.current = live
   const modeRef = useRef<Mode>('idle')
   const [ui, setUi] = useState({ bpm: BPM_FLOOR, elapsed: 0, mode: 'idle' as Mode })
   useEffect(() => {
@@ -109,13 +124,13 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const delta = first === undefined ? 0 : lastStepsRef.current - first.steps
       const perMinute = span > 0 ? (delta / span) * 60_000 : 0
       const base = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, 42 + perMinute * 6))
-      const act = activityRef.current
-      const boost = (act.calls > 0 ? BOOST_TOOL : 0)
+      const act = liveRef.current
+      const boost = (act.toolName !== null ? BOOST_TOOL : 0)
         + (act.partial ? BOOST_THINKING : 0)
         + (act.running ? BOOST_RUNNING : 0)
       const target = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, base + boost))
       bpmRef.current += (target - bpmRef.current) * 0.14
-      const mode: Mode = act.calls > 0 ? 'tool' : act.partial ? 'think' : act.running ? 'run' : 'idle'
+      const mode: Mode = act.toolName !== null ? 'tool' : act.partial ? 'think' : act.running ? 'run' : 'idle'
       modeRef.current = mode
       setUi(current => ({
         bpm: Math.round(bpmRef.current),
@@ -230,7 +245,15 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     }
   }, [])
 
+  // Status word: real model state wins; the flavor rotation only plays while idle.
   const flavor = STATUS_KEYS[Math.floor(ui.elapsed / STATUS_ROTATE_S) % STATUS_KEYS.length]
+  const status = live.error !== null
+    ? `⚠ ${live.error.slice(0, 16)}`
+    : live.toolName !== null
+      ? `EXEC · ${live.toolName}`
+      : live.partialText !== ''
+        ? `⇢ ${live.partialText.slice(-18)}`
+        : t(flavor)
 
   return (
     <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode}>
@@ -242,7 +265,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       <canvas ref={canvasRef} className="cp-lineEcg" aria-hidden />
 
       <div className="cp-lineReadout">
-        <div className="cp-lineStatus">{t(flavor)}</div>
+        <div className="cp-lineStatus" title={status}>{status}</div>
       </div>
     </div>
   )
