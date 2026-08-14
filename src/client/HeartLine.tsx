@@ -213,6 +213,12 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     // frame-rate changes and the speed visibly surges when the frame rate
     // recovers (the "left edge accelerates then settles" artifact).
     let framePeriodMs = 16.7
+    // Frozen pixel cache for true erase-bar rendering: the trace image is a
+    // static buffer; only the pixels the sweep bar has just passed are
+    // refreshed, everything else stays frozen. The image therefore never
+    // scrolls, never jumps as a whole, and is frame-rate independent.
+    let traceCache: number[] = []
+    let lastScanX = -1
     const paint = (now: number): void => {
       if (lastPaintReal === 0) {
         lastPaintReal = now
@@ -260,12 +266,17 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const wander = 0.05 * Math.sin(tNow * 0.6) + 0.035 * Math.sin(tNow * 1.7 + 1.3)
       const bpm = bpmRef.current
       const flatline = bpm < 1
-      const yAt = (x: number): number => {
+
+      // Erase-bar sweep: the bar moves right → left; pixels it has just
+      // passed are re-sampled (frozen update), the rest of the image is
+      // untouched. The right edge is pinned to "now"; beat spacing is
+      // width-independent (fixed paper speed).
+      const sweepPeriod = w / PAPER_SPEED_PX_PER_SECOND
+      const tInSweep = ((tNow % sweepPeriod) + sweepPeriod) % sweepPeriod
+      const scanX = w - tInSweep * PAPER_SPEED_PX_PER_SECOND // w → 0
+      const scanXInt = Math.round(scanX)
+      const yNow = (x: number): number => {
         if (flatline) return mid // the whale's heart has stopped — a flat line
-        // Sub-pixel peak guard: at 30px/s and high BPM the R spike is a
-        // fraction of a pixel wide, so per-pixel sampling would shave the
-        // apex and the trace would visibly "shrink" toward the midline as
-        // the rate rises. Sample 4 sub-points per pixel and keep the peak.
         let v = -Infinity
         for (let i = 0; i < 4; i += 1) {
           const tX = tNow - (w - (x + i * 0.25)) * secondsPerPixel
@@ -275,32 +286,40 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         }
         return mid - (v + wander) * amp
       }
+      if (traceCache.length !== w + 1) {
+        // Width changed: rebuild the buffer, right-anchored, repaint once.
+        traceCache = new Array<number>(w + 1)
+        for (let x = 0; x <= w; x += 1) traceCache[x] = yNow(x)
+        lastScanX = scanXInt
+      } else if (lastScanX > scanXInt) {
+        // Refresh exactly the pixels the sweep has just passed.
+        for (let x = scanXInt; x <= lastScanX && x <= w; x += 1) {
+          traceCache[x] = yNow(x)
+        }
+        lastScanX = scanXInt
+      } else {
+        // Sweep reset (bar jumped back to the right): no pixels refreshed.
+        lastScanX = scanXInt
+      }
 
-      // Sweep (erase-bar) mode, like a real bedside monitor: a bright vertical
-      // bar sweeps right → left; the area it has passed shows the freshly
-      // recorded trace, the un-swept area stays blank. The trace never
-      // scrolls, so there is no exit-rate artifact at all.
-      const period = w / PAPER_SPEED_PX_PER_SECOND
-      const scanT = (displayNow / 1_000) % period
-      const scanX = w - scanT * PAPER_SPEED_PX_PER_SECOND
-      const startX = Math.max(0, Math.ceil(scanX))
-
-      // Chiral ghost: the same trace offset by 3px, faint cyan.
+      // Chiral ghost over the frozen image, faint.
       g.beginPath()
-      for (let x = startX; x <= w; x += 1) {
-        const y = yAt(x)
-        if (x === startX) g.moveTo(x + 3, y)
+      for (let x = 0; x <= w; x += 1) {
+        const y = traceCache[x]
+        if (x === 0) g.moveTo(x + 3, y)
         else g.lineTo(x + 3, y)
       }
-      g.strokeStyle = 'rgba(111, 219, 226, 0.18)'
+      g.globalAlpha = 0.1
+      g.strokeStyle = 'rgba(111, 219, 226, 1)'
       g.lineWidth = 1
       g.stroke()
+      g.globalAlpha = 1
 
-      // Fresh trace: the swept region.
+      // The frozen trace, whole window.
       g.beginPath()
-      for (let x = startX; x <= w; x += 1) {
-        const y = yAt(x)
-        if (x === startX) g.moveTo(x, y)
+      for (let x = 0; x <= w; x += 1) {
+        const y = traceCache[x]
+        if (x === 0) g.moveTo(x, y)
         else g.lineTo(x, y)
       }
       g.strokeStyle = MODE_COLOR[modeRef.current]
