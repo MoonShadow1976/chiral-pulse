@@ -1,0 +1,34 @@
+# Release: on a v*.*.* tag, build the client bundle and publish to npm.
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      # Only tsdown is needed to build the bundle — the workspace-scoped
+      # @deepseek-ai devDependencies are type-check references only and are
+      # not resolvable outside the harness checkout.
+      - name: Install build tooling
+        run: npm install --no-save --no-audit --no-fund tsdown@0.22.2
+
+      - name: Build client bundle
+        run: npx tsdown
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
