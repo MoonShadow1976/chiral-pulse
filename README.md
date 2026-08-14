@@ -61,12 +61,12 @@ pnpm typecheck  # tsc --noEmit
 
 ## 发布
 
-打 tag(`v*.*.*`)→ GitHub Actions 自动构建、发布 npm 并创建 GitHub Release。本仓库已打上 [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题,可在同话题下被发现。
+打 tag(`v*.*.*`)→ GitHub Actions 自动构建、发布 npm 并创建 GitHub Release。
 
 ## 社区与支持
 
 - 反馈与 bug 报告:[GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions)。
-- 加入 DeepSeek Harness 企微群:扫码添加企微小助手,填写入群问卷后小助手会邀请你入群。
+- 本仓库已打上 [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题,可在同话题下被发现。
 
 ## License
 
