@@ -6,3 +6,5 @@ lib/
 tsconfig.local.json
 # Local-only apply smoke test (dev tooling) — never publish.
 scripts/smoke-apply.cjs
+# Local-only erase-bar verification harness (dev tooling) — never publish.
+scripts/verify-erasebar.cjs
