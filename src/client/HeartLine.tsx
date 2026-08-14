@@ -33,8 +33,14 @@ export type HeartLineProps = PropsRuntime<'conversation.input.dock'> & PropsLoca
 
 /** Monitor view height, CSS px. */
 const ECG_HEIGHT = 22
-/** Seconds of signal shown across the window (fixed paper speed). */
-const ECG_WINDOW = 5
+/**
+ * Seconds of signal shown across the window — the FIXED paper speed. The
+ * trace always scrolls one window width per this many seconds, regardless of
+ * heart rate; BPM only changes how many beats fit in the window (42 BPM ≈ 7
+ * beats, 90 BPM ≈ 15). 10s reads like a hospital monitor; shorter windows
+ * look like fast-moving clutter.
+ */
+const ECG_WINDOW = 10
 /** Activity window for the step-rate base, ms. */
 const ACTIVITY_WINDOW_MS = 10_000
 /** Rotating status lines (locale keys), one every STATUS_ROTATE_S ticks. */
@@ -156,6 +162,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     const ctx = canvas.getContext('2d')
     if (ctx === null) return
     ctxRef.current = ctx
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     const applySize = (): void => {
       const dpr = window.devicePixelRatio || 1
@@ -169,6 +176,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       if (width !== widthRef.current) {
         widthRef.current = width
         applySize()
+        if (reduced) paint(performance.now()) // static mode repaints at the new width
       }
     })
     observer.observe(canvas)
@@ -184,9 +192,21 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const c = canvasRef.current
       const g = ctxRef.current
       if (c === null || g === null) return
-      const w = widthRef.current
-      const h = ECG_HEIGHT
-      const dpr = dprRef.current
+      // Self-healing size: measure the live layout every frame so any
+      // remount or hero resize is corrected within one frame, and the trace
+      // always fills the visible strip.
+      const dpr = window.devicePixelRatio || 1
+      const rect = c.getBoundingClientRect()
+      const w = Math.max(120, Math.round(rect.width))
+      const h = Math.max(1, Math.round(rect.height))
+      const wantW = Math.round(w * dpr)
+      const wantH = Math.round(h * dpr)
+      if (c.width !== wantW || c.height !== wantH) {
+        c.width = wantW
+        c.height = wantH
+      }
+      widthRef.current = w
+      dprRef.current = dpr
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, w, h)
 
@@ -239,7 +259,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       g.fill()
     }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (reduced) {
       paint(performance.now()) // one static frame
       return () => { observer.disconnect() }
     }
@@ -272,7 +292,9 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         <span className="cp-lineBpmUnit">{t('bpm.unit')}</span>
       </div>
 
-      <canvas ref={canvasRef} className="cp-lineEcg" aria-hidden />
+      <div className="cp-lineEcgWrap">
+        <canvas ref={canvasRef} className="cp-lineEcg" aria-hidden />
+      </div>
 
       <div className="cp-lineReadout">
         <div className="cp-lineStatus" title={status}>{status}</div>
