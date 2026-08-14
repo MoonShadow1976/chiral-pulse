@@ -22,14 +22,12 @@ jobs:
           node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
-      # Only tsdown is needed to build the bundle — the workspace-scoped
-      # @deepseek-ai devDependencies are type-check references only and are
-      # not resolvable outside the harness checkout.
-      - name: Install build tooling
-        run: npm install --no-save --no-audit --no-fund tsdown@0.22.2
-
+      # tsdown is fetched by npx on the fly — `npm install tsdown` would
+      # resolve the whole dependency tree, and the workspace-scoped
+      # @deepseek-ai devDependencies (type-check references) use the
+      # pnpm-only `workspace:` protocol, which npm cannot resolve.
       - name: Build client bundle
-        run: npx tsdown
+        run: npx --yes tsdown@0.22.2
 
       - name: Publish to npm
         run: npm publish --access public
