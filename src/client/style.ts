@@ -430,5 +430,65 @@ body {
 [data-composer-seat] textarea:focus {
   caret-color: #ffd9a0;
 }
+[data-composer-seat] {
+  box-shadow: 0 0 0 1px rgba(120, 150, 195, 0.18), 0 8px 30px rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Conversation message panels — every turn becomes a DS case
+   ──────────────────────────────────────────────────────────────────────── */
+[data-chat-flow-kind="assistant"],
+[data-chat-flow-kind="user"],
+[data-chat-flow-kind="steering"],
+[data-chat-flow-kind="context"],
+[data-chat-flow-kind="compaction"],
+[data-chat-flow-kind="command"] {
+  background: rgba(11, 15, 21, 0.5);
+  border: 1px solid rgba(120, 150, 195, 0.16);
+  border-radius: 8px;
+  margin: 6px 0;
+  box-shadow: inset 0 0 20px rgba(103, 158, 254, 0.04);
+}
+[data-chat-flow-kind="assistant"] {
+  padding: 8px 10px 8px 18px;
+}
+[data-chat-flow-kind="user"],
+[data-chat-flow-kind="steering"] {
+  padding: 8px 18px 8px 10px;
+}
+[data-chat-flow-kind="context"] {
+  padding: 6px 10px 6px 16px;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Dialogs, menus, tooltips, toasts — the floating DS surfaces
+   ──────────────────────────────────────────────────────────────────────── */
+[role="dialog"] {
+  border: 1px solid rgba(255, 180, 84, 0.3) !important;
+  border-radius: 10px !important;
+  background: linear-gradient(180deg, rgba(13, 18, 25, 0.98), rgba(8, 11, 16, 0.99)) !important;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.5),
+    inset 0 0 24px rgba(103, 158, 254, 0.05) !important;
+}
+[role="menu"] {
+  border: 1px solid rgba(120, 150, 195, 0.28) !important;
+  border-radius: 8px !important;
+  background: rgba(10, 14, 20, 0.97) !important;
+}
+[role="menuitem"]:hover {
+  background: rgba(255, 180, 84, 0.08) !important;
+}
+[role="tooltip"] {
+  border: 1px solid rgba(120, 150, 195, 0.3) !important;
+  border-radius: 6px !important;
+  background: rgba(13, 18, 25, 0.97) !important;
+}
+[role="alert"] {
+  border: 1px solid rgba(255, 180, 84, 0.35) !important;
+  border-radius: 8px !important;
+  background: rgba(13, 18, 25, 0.97) !important;
+}
 
 `
