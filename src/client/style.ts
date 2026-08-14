@@ -172,10 +172,14 @@ body {
   --cp-amber-bright: #ffd9a0;
   --cp-cyan: #6fdbe2;
   --cp-dim: #64727f;
+  /* flex: none — the hero (blank-session) composer column squeezes its
+     children on short viewports; the monitor strip must never shrink. */
+  flex: none;
   display: flex;
   align-items: center;
   gap: 12px;
   height: 26px;
+  min-height: 26px;
   margin: 3px 0 4px;
   padding: 0 10px;
   border: 1px solid rgba(140, 170, 215, 0.26);
@@ -217,11 +221,12 @@ body {
   margin-left: 2px;
 }
 
-.cp-lineEcg {
+.cp-lineEcgWrap {
   flex: 1 1 auto;
   min-width: 100px;
+  min-height: 22px;
   height: 22px;
-  display: block;
+  position: relative;
   border-radius: 0;
   border: 1px solid rgba(140, 170, 215, 0.16);
   /* Static paper grid lives in CSS; the canvas above it only paints the trace. */
@@ -229,6 +234,17 @@ body {
     repeating-linear-gradient(0deg, rgba(140, 170, 215, 0.07) 0 1px, transparent 1px 11px),
     repeating-linear-gradient(90deg, rgba(140, 170, 215, 0.06) 0 1px, transparent 1px 11px),
     rgba(7, 10, 15, 0.55);
+}
+/* The canvas fills its wrapper exactly (absolute), so its intrinsic size can
+   never distort the flex layout or the trace during remounts. */
+.cp-lineEcg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: transparent;
 }
 
 .cp-lineReadout {
@@ -474,6 +490,27 @@ body {
     calc(100% - 8px) 100%,
     0 100%,
     0 8px
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   Sidebar: DS hairline on the conversation-history column
+   ──────────────────────────────────────────────────────────────────────── */
+[data-sidebar-collapsed] > div:first-child {
+  border-right: 1px solid rgba(140, 170, 215, 0.22);
+  box-shadow: inset -1px 0 0 rgba(255, 180, 84, 0.06);
+}
+
+/* Sidebar buttons (New Session etc.): DS chamfered corners. */
+[data-slot="sidebar"] button {
+  border-radius: 0 !important;
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
   );
 }
 
