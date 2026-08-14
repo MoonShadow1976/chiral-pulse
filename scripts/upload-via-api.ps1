@@ -22,8 +22,18 @@ $headers = @{
 $files = (& git ls-files) | Where-Object { $_ -ne '' }
 foreach ($f in $files) {
   $bytes = [IO.File]::ReadAllBytes((Join-Path (Get-Location) $f))
-  $body = @{ message = $Message; content = [Convert]::ToBase64String($bytes) } | ConvertTo-Json
   $uri = "https://api.github.com/repos/$Owner/$Repo/contents/$f"
+  # Updating an existing file requires its current sha; fetch it first.
+  $sha = $null
+  try {
+    $existing = Invoke-RestMethod -Method Get -Uri $uri -Headers $headers
+    $sha = $existing.sha
+  } catch {
+    $sha = $null # new file
+  }
+  $payload = @{ message = $Message; content = [Convert]::ToBase64String($bytes) }
+  if ($null -ne $sha) { $payload.sha = $sha }
+  $body = $payload | ConvertTo-Json
   try {
     Invoke-RestMethod -Method Put -Uri $uri -Headers $headers -Body $body | Out-Null
     Write-Host "uploaded: $f"
