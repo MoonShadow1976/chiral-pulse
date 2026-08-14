@@ -232,6 +232,35 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     // scrolls, never jumps as a whole, and is frame-rate independent.
     let traceCache: number[] = []
     let lastScanX = -1
+    // Continuous phase clock: the trace is ONE unbroken signal in absolute
+    // time — the phase advances (bpm/60) per second, and each pixel samples
+    // the signal at its own time. A ring of (time, phase) samples lets us
+    // evaluate the phase at any sample time in the past, so a mid-sweep rate
+    // change keeps the pixels crossed afterwards on the SAME phase function
+    // as the ones before it: the new line continues the old one (old data is
+    // never repainted, nothing is mixed).
+    let phaseAcc = 0
+    let phaseHistory: Array<{ t: number; phase: number }> = []
+    // Phase at an arbitrary past sample time — linear interpolation over the
+    // history (samples are ~a frame apart, so the error stays negligible even
+    // while the rate ramps at 6 BPM/s).
+    const phaseAt = (tX: number): number => {
+      const arr = phaseHistory
+      if (arr.length === 0) return 0
+      if (tX <= arr[0].t) return arr[0].phase
+      const last = arr[arr.length - 1]
+      if (tX >= last.t) return last.phase
+      let lo = 0
+      let hi = arr.length - 1
+      while (hi - lo > 1) {
+        const m = (lo + hi) >> 1
+        if (arr[m].t <= tX) lo = m
+        else hi = m
+      }
+      const a = arr[lo]
+      const b = arr[hi]
+      return a.phase + ((tX - a.t) / (b.t - a.t)) * (b.phase - a.phase)
+    }
     const paint = (now: number): void => {
       if (lastPaintReal === 0) {
         lastPaintReal = now
@@ -290,6 +319,27 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const tInSweep = ((tNow % sweepPeriod) + sweepPeriod) % sweepPeriod
       const scanX = w - tInSweep * PAPER_SPEED_PX_PER_SECOND // w → 0
       const scanXInt = Math.round(scanX)
+
+      // Advance the continuous phase clock by this frame's display time, and
+      // keep enough history for the oldest pixel the strip can still show
+      // (two sweep periods back). The first frame seeds a constant-rate
+      // history — nothing can have changed before the very first paint — so
+      // the initial full build is a coherent window.
+      if (phaseHistory.length === 0) {
+        phaseAcc = (tNow * bpm) / 60
+        phaseHistory.push({
+          t: tNow - 2 * sweepPeriod - 2,
+          phase: ((tNow - 2 * sweepPeriod - 2) * bpm) / 60,
+        })
+        phaseHistory.push({ t: tNow, phase: phaseAcc })
+      } else {
+        phaseAcc += (bpm / 60) * dt
+        phaseHistory.push({ t: tNow, phase: phaseAcc })
+      }
+      const lookback = 2 * sweepPeriod + 2
+      while (phaseHistory.length > 2 && phaseHistory[0].t < tNow - lookback) {
+        phaseHistory.shift()
+      }
       const yNow = (x: number): number => {
         if (flatline) return mid // the whale's heart has stopped — a flat line
         let v = -Infinity
@@ -306,7 +356,13 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         // region redraws as a real, time-normal waveform window.
         for (let i = 0; i < 4; i += 1) {
           const tX = (tNow - tInSweep) - (w - (x + i * 0.25)) * secondsPerPixel
-          const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
+          // Phase comes from the CONTINUOUS clock, not `tX * bpm/60`: the
+          // product assumes a constant rate and tears the strip apart when
+          // the rate changes mid-sweep (old pixels stay at the old rate, new
+          // ones use the new rate). The clock makes every pixel — crossed
+          // before or after the change — a sample of the SAME unbroken
+          // signal, so the new line simply continues the old one.
+          const phase = ((phaseAt(tX) % 1) + 1) % 1
           const s = ecgValue(phase)
           if (s > v) v = s
         }
