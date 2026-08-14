@@ -1,68 +1,68 @@
 {
-  "name": "chiral-pulse",
-  "version": "0.1.0",
-  "description": "CHIRAL PULSE 鈥?a Death Stranding-styled BB pod vital-signs monitor for the DeepSeek Harness web UI: the session's heartbeat waveform is the hero, and the pulse reacts to real agent activity.",
-  "keywords": [
-    "dsh",
-    "dsh-plugin",
-    "deepseek-harness",
-    "death-stranding",
-    "bb-pod",
-    "heartbeat",
-    "ecg",
-    "ui-plugin"
-  ],
-  "type": "module",
-  "main": "lib/index.js",
-  "exports": {
-    ".": "./lib/index.js",
-    "./client": "./lib/client.js",
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "lib/index.js",
-    "lib/client.js",
-    "lib/client.js.map",
-    "cordis.patch.yml"
-  ],
-  "scripts": {
-    "bundle": "tsdown",
-    "watch": "tsdown --watch",
-    "typecheck": "tsc --noEmit"
-  },
-  "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
-    "client": {
-      "platform": "web",
-      "inject": [
-        "@deepseek-ai/dsh-client-runtime",
-        "@deepseek-ai/dsh-client-locale",
-        "@deepseek-ai/dsh-client-ui-conversation"
-      ]
-    }
-  },
-  "peerDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "react": "^18.2.0"
-  },
-  "devDependencies": {
-    "@deepseek-ai/cordis": "workspace:^",
-    "@deepseek-ai/dsh-client-locale": "workspace:^",
-    "@deepseek-ai/dsh-client-runtime": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-conversation": "workspace:^",
-    "@deepseek-ai/dsh-client-ui-slots": "workspace:^",
-    "@deepseek-ai/dsh-session-stats": "workspace:^",
-    "@deepseek-ai/dsh-token-meter": "workspace:^",
-    "@types/react": "~18.3.1",
-    "react": "^18.2.0",
-    "tsdown": "^0.22.2",
-    "typescript": "^6.0.3"
-  },
-  "license": "MIT"
+    "name":  "chiral-pulse",
+    "version":  "1.2.0",
+    "description":  "CHIRAL PULSE 閳?a Death Stranding-styled BB pod vital-signs monitor for the DeepSeek Harness web UI: the session\u0027s heartbeat waveform is the hero, and the pulse reacts to real agent activity.",
+    "keywords":  [
+                     "dsh",
+                     "dsh-plugin",
+                     "deepseek-harness",
+                     "death-stranding",
+                     "bb-pod",
+                     "heartbeat",
+                     "ecg",
+                     "ui-plugin"
+                 ],
+    "type":  "module",
+    "main":  "lib/index.js",
+    "exports":  {
+                    ".":  "./lib/index.js",
+                    "./client":  "./lib/client.js",
+                    "./package.json":  "./package.json"
+                },
+    "files":  [
+                  "lib/index.js",
+                  "lib/client.js",
+                  "lib/client.js.map",
+                  "cordis.patch.yml"
+              ],
+    "scripts":  {
+                    "bundle":  "tsdown",
+                    "watch":  "tsdown --watch",
+                    "typecheck":  "tsc --noEmit"
+                },
+    "dsh":  {
+                "bundle":  {
+                               "patch":  "./cordis.patch.yml"
+                           },
+                "client":  {
+                               "platform":  "web",
+                               "inject":  [
+                                              "@deepseek-ai/dsh-client-runtime",
+                                              "@deepseek-ai/dsh-client-locale",
+                                              "@deepseek-ai/dsh-client-ui-conversation"
+                                          ]
+                           }
+            },
+    "peerDependencies":  {
+                             "@deepseek-ai/cordis":  "workspace:^",
+                             "@deepseek-ai/dsh-client-locale":  "workspace:^",
+                             "@deepseek-ai/dsh-client-runtime":  "workspace:^",
+                             "@deepseek-ai/dsh-client-ui-conversation":  "workspace:^",
+                             "@deepseek-ai/dsh-client-ui-slots":  "workspace:^",
+                             "react":  "^18.2.0"
+                         },
+    "devDependencies":  {
+                            "@deepseek-ai/cordis":  "workspace:^",
+                            "@deepseek-ai/dsh-client-locale":  "workspace:^",
+                            "@deepseek-ai/dsh-client-runtime":  "workspace:^",
+                            "@deepseek-ai/dsh-client-ui-conversation":  "workspace:^",
+                            "@deepseek-ai/dsh-client-ui-slots":  "workspace:^",
+                            "@deepseek-ai/dsh-session-stats":  "workspace:^",
+                            "@deepseek-ai/dsh-token-meter":  "workspace:^",
+                            "@types/react":  "~18.3.1",
+                            "react":  "^18.2.0",
+                            "tsdown":  "^0.22.2",
+                            "typescript":  "^6.0.3"
+                        },
+    "license":  "MIT"
 }
