@@ -1,35 +1,49 @@
 # CHIRAL PULSE · 手性脉冲
 
-> A Death Stranding-styled **BB pod vital-signs monitor** for the
+> A Death Stranding skin + BB vital-signs monitor for the
 > [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) web UI.
-> The session's **heartbeat waveform is the hero** — and the pulse is real,
-> not decoration: it reacts to the agent's live activity.
+> The **whole interface** is re-skinned in the Death Stranding look (the
+> DeepSeek whale mark keeps its brand blue), and a live **heartbeat paper
+> feed** runs under the composer stats — its pulse accelerates the moment
+> the agent starts thinking or a tool begins executing.
 
-`dsh-plugin` · `deepseek-harness` · `ui-plugin` · `death-stranding` · `bb-pod` · `ecg`
+`dsh-plugin` · `deepseek-harness` · `ui-plugin` · `death-stranding` · `bb-pod` · `ecg` · `theme`
 
 ---
 
 ## 这是什么
 
-**CHIRAL PULSE（手性脉冲）** 是一款 DeepSeek Harness Web 界面插件:一个
-《死亡搁浅》风格的 **BB 舱生命体征监视器**,常驻在输入框上方
-(`conversation.input.dock` 插槽)。
+**CHIRAL PULSE(手性脉冲)** 是一款 DeepSeek Harness Web 界面插件,两层设计:
 
-- **心跳波形是主体** —— 一条连续滚动的 PQRST 心电波形,琥珀色辉光,
-  附一道青色"手性重影"线条,右侧有明亮的扫描头;
-- **BPM 是真实数据** —— 以 10 秒滑动窗口统计会话 `sessionStats` 的步骤增量:
-  空闲时 BB 处于"睡眠"状态(约 42 BPM),Agent 忙碌冲刺时最高 150 BPM;
-  每次真实的工具步骤落地,都会在波形的 R 峰上触发一次可见的"搏动";
-- **死亡搁浅美学** —— 近黑机身 + 琥珀发丝线、HUD 四角括号、CRT 扫描线、
-  手性晶格(60°/120° 交错)、琥珀径向光晕;
-- **生命体征读数** —— 轮次 / 步骤、首字延迟 TTFT、输出速率 TOK·S⁻¹、
-  输入输出 token、缓存命中率、上下文占用条(奥卓克扫描)、
-  以 `sessionId` 派生的 **KNOT 结** 编号;
-- **手性时钟** —— 从 **19:49:19** 开始的死亡搁浅式倒计时,循环往复;
-- **状态轮播** —— `LINK STABLE` / `BB BONDED` / `NO VOIDOUT DETECTED` /
-  `KEEP ON KEEPING ON` …;
-- 点击 BB 舱或右侧箭头展开/收起体征面板(偏好记忆在 localStorage),
-  完整支持 `prefers-reduced-motion`。
+### 1. 全局皮肤 —— 整个界面都是死亡搁浅
+
+不再是小框:插件重映射整个 `--dsw-*` 设计平台调色板,所有组件(侧栏、气泡、
+输入区、设置页)自动换装,不动任何布局结构:
+
+- **暗色主题**:DS 蓝黑机身(`#05070a` 起) + 琥珀发丝线边框 + 琥珀悬停微光;
+- **亮色主题**:集装箱沙纸色调("冥滩白"),同样琥珀描边;
+- **氛围层**:全屏 CRT 扫描线、手性晶格(60°/120° 交错)、四角渐晕,
+  全部 pointer-transparent,不挡任何操作;
+- **鲸鱼 logo 保留**:DeepSeek 品牌蓝原样不动,左上角标识一切照旧;
+- 主题切换(亮/暗/跟随系统)完全兼容,两套皮肤都做齐了。
+
+### 2. 心跳走纸 —— 融入输入区,不突兀
+
+挂在数据行(`conversation.composer.dock` 的 StatsLine)下方的一条 26px
+"监护仪走纸":滚动的心电波形是主角,右侧小字 BPM 与状态轮播。
+**不重复任何数据** —— turns/tokens 那些 StatsLine 本来就有。
+
+**BPM 是实时心跳,跟随 Agent 的每一次活动:**
+
+| 状态 | 来源 | BPM 加成 |
+|---|---|---|
+| 模型正在思考/生成 | 快照 `partial` 非空 | +38 |
+| 工具正在执行 | 快照 `runningCalls` 非空 | +52 |
+| 会话回合进行中 | 快照 `running` | +10 |
+| 空闲 | 10 秒步骤窗口速率 | 基准(~42 入睡) |
+
+BPM 目标用 lerp 平滑——思考一开始,脉搏立刻拉高;工作落地,缓缓回落。
+上限 150,下限 42。
 
 ## 安装
 
@@ -71,6 +85,7 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modul
 ```sh
 pnpm install   # 构建只需要 tsdown;也可直接复用本机已有的 tsdown 二进制
 pnpm bundle    # 产出 lib/index.js (node 半边) + lib/client.js (浏览器半边)
+pnpm typecheck # tsc --noEmit(tsconfig 已用 paths 指向 harness 的类型产物)
 ```
 
 `tsdown.config.ts` 完整复刻了 harness 仓库内共享预设的产物契约:
@@ -86,13 +101,16 @@ pnpm bundle    # 产出 lib/index.js (node 半边) + lib/client.js (浏览器半
    [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题**,便于被发现
    (参见 [deepseek-harness 的插件指南](https://github.com/deepseek-ai/deepseek-harness))。
 
-## 数据来源
+## 工作原理
 
-插件零自持状态:所有数字经由会话标准套件的 `useProjection` 读取
-`sessionStats` / `tokenUsage` / `contextPressure` 投影(host 端由
-`dsh-session-stats` 与 `dsh-token-meter` 提供),波形由纯函数 ECG 合成器
-(`src/client/ecg.ts`,PQRST 高斯凸包)按当前 BPM 滚动生成,rAF 循环直写
-SVG 属性,React 只在投影/秒针/尺寸变化时重渲染。
+- **主题**:ui-theme 的设计平台里 alias 令牌引用静态令牌,插件只重映射
+  `body[data-ds-dark-theme]` / `body:not([data-ds-dark-theme])` 两套静态色,
+  全应用自动跟随;brand 蓝(鲸鱼)刻意不动。
+- **数据**:走纸条零自持状态 —— `useProjection('sessionStats')` 提供步骤
+  窗口,BPM 实时加成来自 `useSession` 快照的 `partial` / `runningCalls` /
+  `running`;波形由纯函数 ECG 合成器(`src/client/ecg.ts`,PQRST 高斯凸包)
+  按当前 BPM 滚动生成,rAF 循环直写 SVG 属性,React 只在快照/秒针/尺寸
+  变化时重渲染。
 
 ## License
 

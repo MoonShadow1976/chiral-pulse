@@ -1,354 +1,236 @@
 /**
- * CHIRAL PULSE — the Death Stranding-styled sheet.
+ * CHIRAL PULSE — the Death Stranding sheet, two layers.
  *
- * Design language: a BB pod vital-signs monitor. Near-black chassis with an
- * amber hairline, HUD corner brackets, CRT scanlines, a faint chiral lattice
- * (60°/120° weave like the chiral carbon lattice), a radial amber bloom, and
- * a scrolling ECG line whose glow is the hero. Readouts sit in the DS
- * monitor idiom: wide-tracked uppercase micro-labels, monospace figures,
- * cyan secondary ink for the chiral clock.
+ * LAYER 1 — the global skin. The whole app paints from `--dsw-*` variables
+ * (ui-theme's design platform: alias tokens reference static tokens, so
+ * remapping the static palette re-skins every component without touching its
+ * structure). We remap the neutral-bluish scale to a DS blue-black (dark) or
+ * container-sand (light), push hairline borders toward amber, tint hovers
+ * with an amber bloom, and leave the deepseek brand blues untouched — the
+ * whale mark stays DeepSeek blue.
  *
- * Every rule is scoped under `.cp-*` and the whole sheet rides one
- * <style data-plugin> tag the plugin owns (the loader removes it on unload).
- * The chassis paints its own dark surface, so the device reads correctly on
- * any app theme.
+ * LAYER 2 — the atmosphere. A fixed full-viewport CRT scanline weave, a
+ * faint chiral lattice, and a vignette, all pointer-transparent. Plus the
+ * BB vital-signs strip that docks under the composer stats: a 26px monitor
+ * paper feed whose scrolling ECG is the hero, with the BPM and status read.
+ *
+ * Every rule is scoped under `.cp-*` (except the token remap, which must
+ * target `body`), rides one owned <style data-plugin> tag, and the loader
+ * removes it on unload.
  */
 
 export const CHIRAL_CSS = `
-.cp-pod {
-  --cp-amber: #ffb454;
-  --cp-amber-bright: #ffd9a0;
-  --cp-amber-faint: rgba(255, 180, 84, 0.22);
-  --cp-cyan: #6fdbe2;
-  --cp-ink: #0b0f14;
-  --cp-ink-2: #10161d;
-  --cp-text: #c9d3dc;
-  --cp-dim: #64727f;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin: 6px 0 2px;
-  padding: 8px 12px 8px 10px;
-  border-radius: 10px;
-  border: 1px solid var(--cp-amber-faint);
-  background:
-    radial-gradient(120% 200% at 0% 0%, rgba(255, 180, 84, 0.07), transparent 55%),
-    radial-gradient(80% 160% at 100% 100%, rgba(111, 219, 226, 0.05), transparent 50%),
-    linear-gradient(180deg, var(--cp-ink-2), var(--cp-ink));
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.45),
-    0 6px 24px rgba(0, 0, 0, 0.35),
-    inset 0 0 28px rgba(255, 180, 84, 0.05);
-  color: var(--cp-text);
-  font-family: ui-monospace, "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
-  overflow: hidden;
+/* ────────────────────────────────────────────────────────────────────────
+   LAYER 1 · global DS skin — token remap
+   ──────────────────────────────────────────────────────────────────────── */
+
+/* Dark theme: DS blue-black machine body. */
+body[data-ds-dark-theme] {
+  --dsw-static-neutral-bluish-1000: rgb(13, 15, 19);
+  --dsw-static-neutral-bluish-950: rgb(5, 7, 10);
+  --dsw-static-neutral-bluish-900: rgb(8, 11, 15);
+  --dsw-static-neutral-bluish-875: rgb(10, 13, 18);
+  --dsw-static-neutral-bluish-850: rgb(12, 16, 22);
+  --dsw-static-neutral-bluish-800: rgb(15, 20, 27);
+  --dsw-static-neutral-bluish-750: rgb(19, 25, 33);
+  --dsw-static-neutral-bluish-700: rgb(23, 30, 40);
+  --dsw-static-neutral-bluish-600: rgb(66, 78, 92);
+  --dsw-static-neutral-bluish-500: rgb(96, 110, 126);
+  --dsw-static-neutral-bluish-400: rgb(122, 136, 152);
+  --dsw-static-neutral-bluish-300: rgb(158, 172, 186);
+  --dsw-static-neutral-bluish-250: rgb(177, 189, 201);
+  --dsw-static-neutral-bluish-200: rgb(190, 200, 210);
+  --dsw-static-neutral-bluish-150: rgb(205, 213, 221);
+  --dsw-static-neutral-bluish-100: rgb(218, 224, 230);
+  --dsw-static-neutral-bluish-75: rgb(228, 233, 238);
+  --dsw-static-neutral-bluish-60: rgb(234, 238, 242);
+  --dsw-static-neutral-bluish-50: rgb(239, 242, 245);
+  --dsw-static-green-400: rgb(94, 222, 189);
+  --dsw-static-green-500: rgb(52, 205, 168);
+  --dsw-alias-border-l1: rgba(255, 180, 84, 0.10);
+  --dsw-alias-border-l2: rgba(255, 180, 84, 0.16);
+  --dsw-alias-border-l2-darkmode-thin: rgba(255, 180, 84, 0.12);
+  --dsw-alias-border-l3: rgba(255, 180, 84, 0.24);
+  --dsw-alias-border-l4: rgba(255, 180, 84, 0.32);
+  --dsw-alias-bg-skeleton: rgba(255, 180, 84, 0.05);
+  --dsw-alias-interactive-bg-hover: rgba(255, 180, 84, 0.07);
+  --dsw-alias-interactive-bg-active: rgba(255, 180, 84, 0.12);
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 180, 84, 0.14);
+  --dsw-alias-scrollbar-bg-l1: rgb(15, 20, 27);
+  --dsw-alias-scrollbar-bg-l2: rgb(19, 25, 33);
+  --dsw-alias-scrollbar-hover-l1: rgb(61, 47, 26);
+  --dsw-alias-scrollbar-hover-l2: rgb(74, 57, 31);
 }
 
-/* HUD corner brackets */
-.cp-pod::before,
-.cp-pod::after {
-  content: "";
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  pointer-events: none;
-  z-index: 3;
-}
-.cp-pod::before {
-  left: 5px;
-  top: 5px;
-  border-left: 2px solid var(--cp-amber);
-  border-top: 2px solid var(--cp-amber);
-  opacity: 0.65;
-}
-.cp-pod::after {
-  right: 5px;
-  bottom: 5px;
-  border-right: 2px solid var(--cp-amber);
-  border-bottom: 2px solid var(--cp-amber);
-  opacity: 0.65;
+/* Light theme: sand-and-paper container yard (still DS). */
+body:not([data-ds-dark-theme]) {
+  --dsw-static-neutral-bluish-1000: rgb(10, 9, 8);
+  --dsw-static-neutral-bluish-950: rgb(14, 13, 11);
+  --dsw-static-neutral-bluish-900: rgb(20, 18, 16);
+  --dsw-static-neutral-bluish-875: rgb(29, 27, 24);
+  --dsw-static-neutral-bluish-850: rgb(35, 32, 28);
+  --dsw-static-neutral-bluish-800: rgb(43, 40, 34);
+  --dsw-static-neutral-bluish-750: rgb(53, 49, 42);
+  --dsw-static-neutral-bluish-700: rgb(66, 61, 52);
+  --dsw-static-neutral-bluish-600: rgb(91, 84, 72);
+  --dsw-static-neutral-bluish-500: rgb(130, 120, 104);
+  --dsw-static-neutral-bluish-400: rgb(157, 148, 127);
+  --dsw-static-neutral-bluish-300: rgb(196, 186, 164);
+  --dsw-static-neutral-bluish-250: rgb(207, 198, 178);
+  --dsw-static-neutral-bluish-200: rgb(216, 208, 191);
+  --dsw-static-neutral-bluish-150: rgb(224, 217, 201);
+  --dsw-static-neutral-bluish-100: rgb(231, 225, 212);
+  --dsw-static-neutral-bluish-75: rgb(236, 231, 219);
+  --dsw-static-neutral-bluish-60: rgb(241, 237, 226);
+  --dsw-static-neutral-bluish-50: rgb(244, 241, 232);
+  --dsw-static-neutral-bluish-00: rgb(249, 247, 240);
+  --dsw-alias-border-l1: rgba(176, 137, 66, 0.16);
+  --dsw-alias-border-l2: rgba(176, 137, 66, 0.24);
+  --dsw-alias-border-l2-darkmode-thin: rgba(176, 137, 66, 0.2);
+  --dsw-alias-border-l3: rgba(176, 137, 66, 0.3);
+  --dsw-alias-border-l4: rgba(176, 137, 66, 0.38);
+  --dsw-alias-bg-skeleton: rgba(176, 137, 66, 0.08);
+  --dsw-alias-interactive-bg-hover: rgba(176, 137, 66, 0.1);
+  --dsw-alias-interactive-bg-active: rgba(176, 137, 66, 0.16);
+  --dsw-alias-interactive-bg-hover-accent: rgba(176, 137, 66, 0.18);
 }
 
-/* CRT scanlines */
-.cp-scanlines {
-  position: absolute;
+/* Ambient bloom behind the app. */
+body {
+  background-image:
+    radial-gradient(1100px 620px at 12% -8%, rgba(255, 180, 84, 0.05), transparent 60%),
+    radial-gradient(900px 560px at 108% 112%, rgba(111, 219, 226, 0.04), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LAYER 2 · atmosphere overlays (injected as fixed elements)
+   ──────────────────────────────────────────────────────────────────────── */
+.cp-atmo {
+  position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 2;
+  z-index: 2147483000;
+}
+.cp-atmo-scanlines {
   background: repeating-linear-gradient(
     0deg,
-    rgba(255, 255, 255, 0.028) 0 1px,
+    rgba(255, 255, 255, 0.026) 0 1px,
     transparent 1px 3px
   );
   mix-blend-mode: overlay;
 }
-
-/* Chiral lattice weave */
-.cp-lattice {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  opacity: 0.55;
+.cp-atmo-lattice {
+  opacity: 0.6;
   background:
-    repeating-linear-gradient(60deg, transparent 0 15px, rgba(255, 180, 84, 0.05) 15px 16px),
-    repeating-linear-gradient(120deg, transparent 0 15px, rgba(111, 219, 226, 0.045) 15px 16px);
+    repeating-linear-gradient(60deg, transparent 0 17px, rgba(255, 180, 84, 0.035) 17px 18px),
+    repeating-linear-gradient(120deg, transparent 0 17px, rgba(111, 219, 226, 0.03) 17px 18px);
+}
+.cp-atmo-vignette {
+  background: radial-gradient(120% 100% at 50% 40%, transparent 55%, rgba(0, 0, 0, 0.22) 100%);
 }
 
-/* ── BB pod glyph (left) ─────────────────────────────────────────────── */
-.cp-glyph {
-  position: relative;
-  flex: none;
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 180, 84, 0.4);
-  background:
-    radial-gradient(circle at 50% 38%, rgba(255, 180, 84, 0.18), rgba(10, 14, 19, 0.65) 72%);
-  box-shadow: inset 0 0 12px rgba(255, 180, 84, 0.14);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-.cp-glyph svg {
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(0 0 6px rgba(255, 180, 84, 0.85));
-}
-.cp-glyphLabel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 2px;
-  text-align: center;
-  font-size: 7px;
-  letter-spacing: 1.5px;
-  color: var(--cp-amber);
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-/* ── ECG monitor (center, the hero) ──────────────────────────────────── */
-.cp-ecgArea {
-  position: relative;
-  flex: 1 1 auto;
-  min-width: 120px;
-  height: 42px;
-  border-radius: 6px;
+/* ────────────────────────────────────────────────────────────────────────
+   BB vital-signs strip · the heartbeat paper feed
+   ──────────────────────────────────────────────────────────────────────── */
+.cp-line {
+  --cp-amber: #ffb454;
+  --cp-amber-bright: #ffd9a0;
+  --cp-cyan: #6fdbe2;
+  --cp-dim: #64727f;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 26px;
+  margin: 3px 0 4px;
+  padding: 0 10px;
   border: 1px solid rgba(255, 180, 84, 0.14);
-  background:
-    repeating-linear-gradient(0deg, rgba(255, 180, 84, 0.05) 0 1px, transparent 1px 21px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0.18));
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255, 180, 84, 0.04), rgba(5, 7, 10, 0.55));
+  box-shadow: inset 0 0 16px rgba(255, 180, 84, 0.05);
+  color: #c9d3dc;
+  font-family: ui-monospace, "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
+  overflow: hidden;
 }
-.cp-ecgCenterline {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(255, 180, 84, 0.16);
-  pointer-events: none;
+body:not([data-ds-dark-theme]) .cp-line {
+  background: linear-gradient(180deg, rgba(176, 137, 66, 0.08), rgba(249, 247, 240, 0.6));
 }
-.cp-ecg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+
+.cp-lineBpm {
+  flex: none;
+  min-width: 58px;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 1px;
+  color: var(--cp-amber-bright);
+  text-shadow: 0 0 10px rgba(255, 180, 84, 0.5);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.cp-lineBpmUnit {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  color: var(--cp-dim);
+  margin-left: 3px;
+}
+
+.cp-lineEcg {
+  flex: 1 1 auto;
+  min-width: 100px;
+  height: 22px;
   display: block;
 }
-.cp-ecgLine {
+.cp-lineEcgLine {
   fill: none;
   stroke: var(--cp-amber);
-  stroke-width: 1.6;
+  stroke-width: 1.4;
   stroke-linecap: round;
   stroke-linejoin: round;
-  filter: drop-shadow(0 0 3px rgba(255, 180, 84, 0.9)) drop-shadow(0 0 9px rgba(255, 180, 84, 0.45));
+  filter: drop-shadow(0 0 3px rgba(255, 180, 84, 0.85)) drop-shadow(0 0 8px rgba(255, 180, 84, 0.4));
 }
-.cp-ecgGhost {
+.cp-lineEcgGhost {
   fill: none;
   stroke: var(--cp-cyan);
   stroke-width: 1;
-  opacity: 0.22;
-  filter: drop-shadow(0 0 4px rgba(111, 219, 226, 0.5));
+  opacity: 0.2;
+  filter: drop-shadow(0 0 4px rgba(111, 219, 226, 0.45));
 }
-.cp-ecgHead {
+.cp-lineEcgHead {
   fill: var(--cp-amber-bright);
   filter: drop-shadow(0 0 5px rgba(255, 180, 84, 1));
 }
-.cp-ecgHeadHalo {
-  fill: rgba(255, 180, 84, 0.22);
+.cp-lineEcgHeadHalo {
+  fill: rgba(255, 180, 84, 0.2);
 }
 
-/* ── Readouts (right) ────────────────────────────────────────────────── */
-.cp-vitals {
+.cp-lineReadout {
   flex: none;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 3px;
-  min-width: 150px;
+  gap: 1px;
+  min-width: 118px;
 }
-.cp-bpm {
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: 1px;
-  color: var(--cp-amber-bright);
-  text-shadow: 0 0 12px rgba(255, 180, 84, 0.55);
-  font-variant-numeric: tabular-nums;
-}
-.cp-bpmUnit {
-  font-size: 9px;
-  letter-spacing: 2px;
-  color: var(--cp-dim);
-  margin-left: 4px;
-}
-.cp-status {
-  font-size: 9px;
-  letter-spacing: 2px;
+.cp-lineStatus {
+  font-size: 8px;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   color: var(--cp-cyan);
-  opacity: 0.9;
   white-space: nowrap;
 }
-.cp-clock {
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  color: var(--cp-dim);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* ── Toggle ──────────────────────────────────────────────────────────── */
-.cp-toggle {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
-  border: 1px solid var(--cp-amber-faint);
-  background: rgba(255, 180, 84, 0.06);
-  color: var(--cp-amber);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1;
-  padding: 0;
-  transition: background 120ms ease, color 120ms ease;
-}
-.cp-toggle:hover {
-  background: rgba(255, 180, 84, 0.16);
-  color: var(--cp-amber-bright);
-}
-.cp-toggle:focus-visible {
-  outline: 1px solid var(--cp-amber);
-  outline-offset: 2px;
-}
-.cp-chevron {
-  display: inline-block;
-  transition: transform 180ms ease;
-}
-.cp-pod[data-cp-expanded="true"] .cp-chevron {
-  transform: rotate(180deg);
-}
-
-/* ── Expanded vitals panel ───────────────────────────────────────────── */
-.cp-panel {
-  display: none;
-  grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
-  gap: 6px 18px;
-  padding: 10px 14px 8px;
-  border-top: 1px solid var(--cp-amber-faint);
-  background: rgba(0, 0, 0, 0.22);
-}
-.cp-pod[data-cp-expanded="true"] {
-  flex-wrap: wrap;
-}
-.cp-pod[data-cp-expanded="true"] .cp-panel {
-  display: grid;
-  flex-basis: 100%;
-}
-/* The odradek scan bar belongs to the expanded face only. */
-.cp-pod:not([data-cp-expanded="true"]) .cp-ctx {
-  display: none;
-}
-.cp-field {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-.cp-fieldLabel {
+.cp-lineClock {
   font-size: 8px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 1.2px;
   color: var(--cp-dim);
-}
-.cp-fieldValue {
-  font-size: 13px;
-  letter-spacing: 1px;
-  color: var(--cp-text);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.cp-fieldValue strong {
-  color: var(--cp-amber-bright);
-  font-weight: 600;
 }
 
-/* Context-pressure bar: the odradek scan */
-.cp-ctx {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-top: 1px solid var(--cp-amber-faint);
-  flex-basis: 100%;
-}
-.cp-ctxLabel {
-  font-size: 8px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--cp-dim);
-  flex: none;
-}
-.cp-ctxTrack {
-  position: relative;
-  flex: 1 1 auto;
-  height: 5px;
-  border-radius: 3px;
-  background: rgba(255, 180, 84, 0.12);
-  overflow: hidden;
-}
-.cp-ctxFill {
-  position: absolute;
-  inset: 0 auto 0 0;
-  border-radius: 3px;
-  background: linear-gradient(90deg, rgba(255, 180, 84, 0.5), var(--cp-amber));
-  box-shadow: 0 0 8px rgba(255, 180, 84, 0.7);
-  transition: width 400ms ease;
-}
-.cp-ctxFill[data-cp-hot="true"] {
-  background: linear-gradient(90deg, rgba(255, 107, 74, 0.55), var(--cp-danger));
-  box-shadow: 0 0 8px rgba(255, 107, 74, 0.7);
-}
-.cp-ctxValue {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: var(--cp-amber-bright);
-  flex: none;
-  font-variant-numeric: tabular-nums;
-  min-width: 38px;
-  text-align: right;
-}
-
-/* Motion */
 @media (prefers-reduced-motion: reduce) {
-  .cp-glyph svg {
-    filter: drop-shadow(0 0 3px rgba(255, 180, 84, 0.7));
+  .cp-lineEcgLine,
+  .cp-lineEcgHead {
+    filter: drop-shadow(0 0 2px rgba(255, 180, 84, 0.6));
   }
 }
 `
