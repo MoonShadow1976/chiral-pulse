@@ -13,6 +13,19 @@
 
 ---
 
+## 版本
+
+| 版本 | npm | GitHub Release | 亮点 |
+|---|---|---|---|
+| **1.2.3** | ✅ [chiral-pulse@1.2.3](https://www.npmjs.com/package/chiral-pulse) | [v1.2.3](https://github.com/MoonShadow1976/chiral-pulse/releases/tag/v1.2.3) | 真·erase-bar 扫掠(冻结像素缓存,扫描线就地刷新);重试卡顿→心跳停跳;英雄页/徽章修复 |
+| **1.2.2** | — | [v1.2.2](https://github.com/MoonShadow1976/chiral-pulse/releases/tag/v1.2.2) | sweep 模式过渡版本(被 1.2.3 取代) |
+| **1.2.0** | — | [v1.2.0](https://github.com/MoonShadow1976/chiral-pulse/releases/tag/v1.2.0) | 恒定走纸、切角语言、全局暗蓝皮肤定稿 |
+| **0.1.0** | ✅ 已发布 | [v0.1.0](https://github.com/MoonShadow1976/chiral-pulse/releases/tag/v0.1.0) | 首个版本 |
+
+> 发版流程:打 tag(`v*.*.*`)→ GitHub Actions 自动构建并发布 npm(见 `.github/workflows/release.yml`)。
+
+---
+
 ## 这是什么
 
 **CHIRAL PULSE(手性脉冲)** 是一款 DeepSeek Harness Web 界面插件,两层设计:
