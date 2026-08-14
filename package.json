@@ -1,6 +1,6 @@
 {
     "name":  "chiral-pulse",
-    "version":  "1.2.6",
+    "version":  "1.2.7",
     "description":  "CHIRAL PULSE - a Death Stranding-styled BB pod vital-signs monitor for the DeepSeek Harness web UI: the session's heartbeat waveform is the hero, and the pulse reacts to real agent activity.",
     "keywords":  [
                      "dsh",
