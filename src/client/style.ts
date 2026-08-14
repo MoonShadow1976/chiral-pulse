@@ -28,88 +28,88 @@ export const CHIRAL_CSS = `
    themes, so the DS look is identical under light and dark settings. */
 body[data-ds-dark-theme],
 body:not([data-ds-dark-theme]) {
-  /* machine body */
-  --dsw-alias-bg-base: rgb(5, 7, 10);
-  --dsw-alias-bg-layer-1: rgb(8, 11, 15);
-  --dsw-alias-bg-layer-2: rgb(10, 14, 20);
-  --dsw-alias-bg-layer-3: rgb(13, 18, 25);
-  --dsw-alias-bg-overlay: rgb(19, 25, 33);
+  /* machine body — blue-grey with air, not a black void */
+  --dsw-alias-bg-base: rgb(13, 17, 23);
+  --dsw-alias-bg-layer-1: rgb(17, 22, 29);
+  --dsw-alias-bg-layer-2: rgb(21, 27, 35);
+  --dsw-alias-bg-layer-3: rgb(26, 33, 42);
+  --dsw-alias-bg-overlay: rgb(31, 40, 51);
   --dsw-alias-bg-mask-1: rgba(0, 0, 0, 0.5);
   --dsw-alias-bg-mask-2: rgba(0, 0, 0, 0.22);
   --dsw-alias-bg-mask-3: rgba(0, 0, 0, 0.5);
-  --dsw-alias-bg-mask-drop: rgba(8, 11, 15, 0.72);
-  --dsw-alias-bg-skeleton: rgba(150, 170, 200, 0.06);
+  --dsw-alias-bg-mask-drop: rgba(10, 14, 19, 0.72);
+  --dsw-alias-bg-skeleton: rgba(150, 170, 200, 0.07);
 
   /* text: cold blue-grey */
-  --dsw-alias-label-primary: rgb(232, 237, 243);
-  --dsw-alias-label-secondary: rgb(168, 180, 195);
-  --dsw-alias-label-tertiary: rgb(124, 138, 156);
-  --dsw-alias-label-caption: rgb(104, 118, 136);
-  --dsw-alias-label-dimmed: rgb(88, 101, 118);
-  --dsw-alias-label-primary-dimmed: rgb(200, 208, 218);
-  --dsw-alias-label-primary-inverted: rgb(232, 237, 243);
-  --dsw-alias-label-primary-foreground: rgb(10, 14, 20);
-  --dsw-alias-brand-text: rgb(232, 237, 243);
+  --dsw-alias-label-primary: rgb(235, 240, 246);
+  --dsw-alias-label-secondary: rgb(178, 190, 205);
+  --dsw-alias-label-tertiary: rgb(140, 153, 170);
+  --dsw-alias-label-caption: rgb(108, 122, 141);
+  --dsw-alias-label-dimmed: rgb(94, 108, 127);
+  --dsw-alias-label-primary-dimmed: rgb(205, 213, 222);
+  --dsw-alias-label-primary-inverted: rgb(235, 240, 246);
+  --dsw-alias-label-primary-foreground: rgb(13, 17, 23);
+  --dsw-alias-brand-text: rgb(235, 240, 246);
   --dsw-alias-brand-primary: rgb(103, 158, 254);
 
-  /* hairlines: cold blue, amber only as a faint blush */
-  --dsw-alias-border-l1: rgba(120, 150, 195, 0.12);
-  --dsw-alias-border-l2: rgba(120, 150, 195, 0.2);
-  --dsw-alias-border-l2-darkmode-thin: rgba(120, 150, 195, 0.16);
-  --dsw-alias-border-l3: rgba(120, 150, 195, 0.3);
-  --dsw-alias-border-l4: rgba(120, 150, 195, 0.4);
-  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.08);
-  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.1);
+  /* hairlines: cold blue, readable against the body */
+  --dsw-alias-border-l1: rgba(140, 170, 215, 0.15);
+  --dsw-alias-border-l2: rgba(140, 170, 215, 0.24);
+  --dsw-alias-border-l2-darkmode-thin: rgba(140, 170, 215, 0.19);
+  --dsw-alias-border-l3: rgba(140, 170, 215, 0.34);
+  --dsw-alias-border-l4: rgba(140, 170, 215, 0.46);
+  --dsw-alias-border-inverted: rgba(255, 255, 255, 0.09);
+  --dsw-alias-border-inverted2: rgba(255, 255, 255, 0.11);
 
   /* hovers: amber bloom, kept subtle */
-  --dsw-alias-interactive-bg-hover: rgba(255, 180, 84, 0.07);
-  --dsw-alias-interactive-bg-active: rgba(255, 180, 84, 0.11);
-  --dsw-alias-interactive-bg-hover-accent: rgba(255, 180, 84, 0.13);
-  --dsw-alias-interactive-bg-hover-solid: rgb(16, 22, 30);
+  --dsw-alias-interactive-bg-hover: rgba(255, 180, 84, 0.08);
+  --dsw-alias-interactive-bg-active: rgba(255, 180, 84, 0.12);
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 180, 84, 0.14);
+  --dsw-alias-interactive-bg-hover-solid: rgb(22, 29, 38);
   --dsw-alias-interactive-bg-hover-danger: rgba(242, 90, 90, 0.14);
 
   /* buttons: brand blue stays the primary action */
-  --dsw-alias-button-primary-dimmed: rgb(24, 32, 44);
+  --dsw-alias-button-primary-dimmed: rgb(30, 40, 53);
   --dsw-alias-button-primary-hover: rgb(124, 172, 255);
-  --dsw-alias-button-ghost-active-fill: rgb(16, 22, 30);
-  --dsw-alias-button-ghost-active-hover: rgb(20, 27, 37);
-  --dsw-alias-button-ghost-active-border: rgb(120, 150, 195);
-  --dsw-alias-button-floating-fill: rgb(13, 18, 25);
-  --dsw-alias-button-floating-hover: rgb(18, 24, 33);
-  --dsw-alias-button-elevated-fill: rgb(16, 22, 30);
-  --dsw-alias-button-contrast-fill: rgb(200, 208, 218);
-  --dsw-alias-button-tool-bar-fill: rgba(120, 150, 195, 0.22);
-  --dsw-alias-button-tool-bar-fill-invisible: rgba(120, 150, 195, 0.12);
-  --dsw-alias-button-tool-bar-hover: rgba(120, 150, 195, 0.3);
+  --dsw-alias-button-ghost-active-fill: rgb(22, 29, 38);
+  --dsw-alias-button-ghost-active-hover: rgb(27, 35, 46);
+  --dsw-alias-button-ghost-active-border: rgb(140, 170, 215);
+  --dsw-alias-button-floating-fill: rgb(19, 25, 33);
+  --dsw-alias-button-floating-hover: rgb(24, 31, 41);
+  --dsw-alias-button-elevated-fill: rgb(22, 29, 38);
+  --dsw-alias-button-contrast-fill: rgb(205, 213, 222);
+  --dsw-alias-button-tool-bar-fill: rgba(140, 170, 215, 0.24);
+  --dsw-alias-button-tool-bar-fill-invisible: rgba(140, 170, 215, 0.13);
+  --dsw-alias-button-tool-bar-hover: rgba(140, 170, 215, 0.32);
 
   /* surfaces */
-  --dsw-specific-sidebar-fill: rgb(6, 9, 13);
-  --dsw-specific-sidebar-nav-item-active: rgb(16, 22, 30);
-  --dsw-specific-sidebar-nav-item-active-accent: rgb(22, 30, 41);
-  --dsw-specific-sidebar-nav-item-hover: rgb(12, 17, 24);
-  --dsw-specific-bubble: rgb(11, 15, 21);
-  --dsw-specific-bubble-highlight: rgb(16, 22, 30);
-  --dsw-specific-input-major: rgb(10, 14, 20);
-  --dsw-specific-login-input: rgb(8, 11, 16);
-  --dsw-specific-menu: rgb(13, 18, 25);
-  --dsw-specific-selector: rgb(15, 20, 28);
-  --dsw-specific-tip: rgb(10, 14, 20);
-  --dsw-alias-markdown-code-block: rgb(7, 10, 14);
-  --dsw-alias-markdown-code-block-banner: rgb(9, 12, 17);
-  --dsw-alias-markdown-inline-code: rgb(13, 18, 25);
-  --dsw-alias-markdown-code-segment-selected: rgb(10, 14, 20);
-  --dsw-alias-markdown-code-segment-unselected: rgb(8, 11, 16);
-  --dsw-alias-markdown-placeholder: rgb(10, 14, 20);
-  --dsw-alias-markdown-tag: rgb(13, 18, 25);
-  --dsw-alias-markdown-citation: rgb(16, 22, 30);
+  --dsw-specific-sidebar-fill: rgb(9, 12, 17);
+  --dsw-specific-sidebar-nav-item-active: rgb(20, 27, 36);
+  --dsw-specific-sidebar-nav-item-active-accent: rgb(27, 36, 48);
+  --dsw-specific-sidebar-nav-item-hover: rgb(15, 20, 28);
+  --dsw-specific-bubble: rgb(18, 24, 32);
+  --dsw-specific-bubble-highlight: rgb(24, 32, 42);
+  --dsw-specific-input-major: rgb(15, 20, 27);
+  --dsw-specific-login-input: rgb(12, 16, 22);
+  --dsw-specific-menu: rgb(21, 27, 35);
+  --dsw-specific-selector: rgb(20, 26, 34);
+  --dsw-specific-tip: rgb(16, 21, 28);
+  --dsw-alias-markdown-code-block: rgb(10, 14, 19);
+  --dsw-alias-markdown-code-block-banner: rgb(13, 17, 23);
+  --dsw-alias-markdown-inline-code: rgb(18, 24, 32);
+  --dsw-alias-markdown-code-segment-selected: rgb(16, 21, 28);
+  --dsw-alias-markdown-code-segment-unselected: rgb(12, 16, 22);
+  --dsw-alias-markdown-placeholder: rgb(16, 21, 28);
+  --dsw-alias-markdown-tag: rgb(18, 24, 32);
+  --dsw-alias-markdown-citation: rgb(22, 29, 38);
 
   /* floats */
-  --dsw-alias-toast-bg: rgb(17, 23, 31);
-  --dsw-alias-tooltip-bg: rgb(15, 20, 28);
-  --dsw-alias-scrollbar-bg-l1: rgb(10, 14, 20);
-  --dsw-alias-scrollbar-bg-l2: rgb(13, 18, 25);
-  --dsw-alias-scrollbar-hover-l1: rgb(30, 38, 50);
-  --dsw-alias-scrollbar-hover-l2: rgb(38, 48, 63);
+  --dsw-alias-toast-bg: rgb(22, 29, 38);
+  --dsw-alias-tooltip-bg: rgb(20, 26, 34);
+  --dsw-alias-scrollbar-bg-l1: rgb(13, 18, 25);
+  --dsw-alias-scrollbar-bg-l2: rgb(17, 23, 31);
+  --dsw-alias-scrollbar-hover-l1: rgb(34, 44, 58);
+  --dsw-alias-scrollbar-hover-l2: rgb(42, 54, 70);
 
   /* status: amber stays the warn/emphasis hue; success leans chiral cyan */
   --dsw-alias-state-warn-primary: rgb(245, 158, 11);
@@ -121,6 +121,12 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-state-success-tertiary: rgb(12, 28, 24);
   --dsw-static-green-400: rgb(94, 222, 189);
   --dsw-static-green-500: rgb(52, 205, 168);
+}
+
+/* Focus ring: amber, the DS highlight color. */
+:focus-visible {
+  outline: 1px solid rgba(255, 180, 84, 0.65) !important;
+  outline-offset: 2px;
 }
 
 /* Ambient bloom behind the app. */
@@ -172,13 +178,25 @@ body {
   height: 26px;
   margin: 3px 0 4px;
   padding: 0 10px;
-  border: 1px solid rgba(120, 150, 195, 0.22);
-  border-radius: 6px;
-  background: linear-gradient(180deg, rgba(10, 14, 20, 0.9), rgba(5, 7, 10, 0.92));
-  box-shadow: inset 0 0 16px rgba(103, 158, 254, 0.06);
+  border: 1px solid rgba(140, 170, 215, 0.26);
+  border-radius: 0;
+  background:
+    linear-gradient(115deg, rgba(140, 190, 255, 0.06) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(14, 19, 26, 0.92), rgba(9, 13, 18, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 16px rgba(103, 158, 254, 0.06);
   color: #c9d3dc;
   font-family: ui-monospace, "Cascadia Mono", "JetBrains Mono", Consolas, "Courier New", monospace;
   overflow: hidden;
+  clip-path: polygon(
+    7px 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    0 100%,
+    0 7px
+  );
 }
 
 .cp-lineBpm {
@@ -204,6 +222,12 @@ body {
   min-width: 100px;
   height: 22px;
   display: block;
+  border-radius: 0;
+  border: 1px solid rgba(140, 170, 215, 0.16);
+  background:
+    repeating-linear-gradient(0deg, rgba(140, 170, 215, 0.07) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, rgba(140, 170, 215, 0.06) 0 1px, transparent 1px 11px),
+    rgba(7, 10, 15, 0.55);
 }
 .cp-lineEcgLine {
   fill: none;
@@ -262,14 +286,6 @@ body {
 /* ────────────────────────────────────────────────────────────────────────
    ECG paper grid + activity-mode color coupling
    ──────────────────────────────────────────────────────────────────────── */
-.cp-lineEcg {
-  border-radius: 4px;
-  border: 1px solid rgba(120, 150, 195, 0.14);
-  background:
-    repeating-linear-gradient(0deg, rgba(120, 150, 195, 0.06) 0 1px, transparent 1px 11px),
-    repeating-linear-gradient(90deg, rgba(120, 150, 195, 0.05) 0 1px, transparent 1px 11px),
-    rgba(5, 7, 10, 0.5);
-}
 .cp-line[data-mode="think"] .cp-lineBpm {
   color: #7fe3e8;
   text-shadow: 0 0 10px rgba(111, 219, 226, 0.55);
@@ -298,8 +314,8 @@ body {
 [data-chat-flow-kind="assistant"]::before {
   content: "✦";
   position: absolute;
-  left: 2px;
-  top: 4px;
+  left: 4px;
+  top: 12px;
   color: rgba(255, 180, 84, 0.85);
   font-size: 11px;
   line-height: 1;
@@ -335,8 +351,8 @@ body {
 [data-chat-flow-kind="context"]::before {
   content: "⇢";
   position: absolute;
-  left: 1px;
-  top: 2px;
+  left: 2px;
+  top: 12px;
   color: rgba(111, 219, 226, 0.7);
   font-size: 11px;
   line-height: 1;
@@ -356,11 +372,23 @@ body {
 [data-diff],
 [data-terminal],
 [data-context-injection-body] {
-  border: 1px solid rgba(120, 150, 195, 0.22) !important;
-  border-radius: 8px !important;
-  background: linear-gradient(180deg, rgba(11, 15, 21, 0.86), rgba(6, 9, 13, 0.9)) !important;
-  box-shadow: inset 0 0 18px rgba(103, 158, 254, 0.05);
+  border: 1px solid rgba(140, 170, 215, 0.24) !important;
+  border-radius: 0 !important;
+  background:
+    linear-gradient(115deg, rgba(140, 190, 255, 0.06) 0%, transparent 30%),
+    linear-gradient(180deg, rgba(15, 20, 27, 0.88), rgba(9, 13, 18, 0.92)) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 18px rgba(103, 158, 254, 0.05);
   position: relative;
+  clip-path: polygon(
+    7px 0,
+    100% 0,
+    100% calc(100% - 7px),
+    calc(100% - 7px) 100%,
+    0 100%,
+    0 7px
+  );
 }
 [data-terminal]::before {
   content: "❯_";
@@ -431,8 +459,19 @@ body {
   caret-color: #ffd9a0;
 }
 [data-composer-seat] {
-  box-shadow: 0 0 0 1px rgba(120, 150, 195, 0.18), 0 8px 30px rgba(0, 0, 0, 0.35);
-  border-radius: 12px;
+  box-shadow:
+    inset 0 0 0 1px rgba(140, 170, 215, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -12px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 0;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
 }
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -444,11 +483,24 @@ body {
 [data-chat-flow-kind="context"],
 [data-chat-flow-kind="compaction"],
 [data-chat-flow-kind="command"] {
-  background: rgba(11, 15, 21, 0.5);
-  border: 1px solid rgba(120, 150, 195, 0.16);
-  border-radius: 8px;
+  background:
+    linear-gradient(115deg, rgba(140, 190, 255, 0.07) 0%, transparent 32%),
+    linear-gradient(180deg, rgba(18, 24, 32, 0.66), rgba(13, 18, 25, 0.72));
+  border: 1px solid rgba(140, 170, 215, 0.2);
+  border-radius: 0;
   margin: 6px 0;
-  box-shadow: inset 0 0 20px rgba(103, 158, 254, 0.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 0 20px rgba(103, 158, 254, 0.05);
+  /* DS chamfer: 45° cuts at the top-left and bottom-right corners. */
+  clip-path: polygon(
+    9px 0,
+    100% 0,
+    100% calc(100% - 9px),
+    calc(100% - 9px) 100%,
+    0 100%,
+    0 9px
+  );
 }
 [data-chat-flow-kind="assistant"] {
   padding: 8px 10px 8px 18px;
@@ -465,30 +517,75 @@ body {
    Dialogs, menus, tooltips, toasts — the floating DS surfaces
    ──────────────────────────────────────────────────────────────────────── */
 [role="dialog"] {
-  border: 1px solid rgba(255, 180, 84, 0.3) !important;
-  border-radius: 10px !important;
-  background: linear-gradient(180deg, rgba(13, 18, 25, 0.98), rgba(8, 11, 16, 0.99)) !important;
+  border: 1px solid rgba(255, 180, 84, 0.32) !important;
+  border-radius: 0 !important;
+  background: linear-gradient(180deg, rgba(15, 20, 27, 0.98), rgba(10, 14, 19, 0.99)) !important;
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.5),
-    inset 0 0 24px rgba(103, 158, 254, 0.05) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 26px rgba(103, 158, 254, 0.06) !important;
+  clip-path: polygon(
+    12px 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0 100%,
+    0 12px
+  );
 }
 [role="menu"] {
-  border: 1px solid rgba(120, 150, 195, 0.28) !important;
-  border-radius: 8px !important;
-  background: rgba(10, 14, 20, 0.97) !important;
+  border: 1px solid rgba(140, 170, 215, 0.3) !important;
+  border-radius: 0 !important;
+  background: rgba(13, 18, 25, 0.97) !important;
+  clip-path: polygon(
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%,
+    0 8px
+  );
 }
 [role="menuitem"]:hover {
   background: rgba(255, 180, 84, 0.08) !important;
 }
 [role="tooltip"] {
-  border: 1px solid rgba(120, 150, 195, 0.3) !important;
-  border-radius: 6px !important;
-  background: rgba(13, 18, 25, 0.97) !important;
+  border: 1px solid rgba(140, 170, 215, 0.32) !important;
+  border-radius: 0 !important;
+  background: rgba(15, 20, 27, 0.97) !important;
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
 }
 [role="alert"] {
-  border: 1px solid rgba(255, 180, 84, 0.35) !important;
-  border-radius: 8px !important;
-  background: rgba(13, 18, 25, 0.97) !important;
+  border: 1px solid rgba(255, 180, 84, 0.38) !important;
+  border-radius: 0 !important;
+  background: rgba(15, 20, 27, 0.97) !important;
+  clip-path: polygon(
+    8px 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0 100%,
+    0 8px
+  );
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   DS chamfer everywhere else: kill the round-corner language
+   ──────────────────────────────────────────────────────────────────────── */
+button,
+input,
+textarea,
+select,
+[role="tab"],
+[role="menuitem"],
+[role="treeitem"] {
+  border-radius: 0 !important;
 }
 
 `

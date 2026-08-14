@@ -77,7 +77,8 @@ $remoteUrl = "https://github.com/$Owner/$Repo.git"
 # remote to the plain URL.
 Write-Host '==> pushing'
 $cred = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("x-access-token:$token"))
-git remote remove origin 2>$null
+$hasOrigin = (& git remote) -contains 'origin'
+if ($hasOrigin) { git remote remove origin }
 git remote add origin $remoteUrl
 git -c http.extraheader="Authorization: Basic $cred" push -u origin master
 git remote set-url origin $remoteUrl
