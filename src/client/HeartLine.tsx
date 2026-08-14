@@ -1,21 +1,21 @@
 /**
- * HeartLine — the CHIRAL PULSE monitor strip, docked under the composer
- * stats (`conversation.composer.dock`), where the session's data already
- * lives. A 26px "monitor paper feed": the scrolling ECG waveform is the
- * hero, flanked by the BPM read and the status clock. No duplicated
- * figures — StatsLine already shows turns/tokens; this strip only carries
- * the pulse.
+ * HeartLine — the CHIRAL PULSE monitor strip, docked above the composer
+ * (`conversation.input.dock`). A 26px "monitor paper feed": the scrolling
+ * ECG waveform is the hero, flanked by the BPM read and the status word.
+ * No duplicated figures — StatsLine already shows turns/tokens.
  *
  * The pulse is LIVE, not decorative:
  *  - `partial`  non-null → the model is thinking/generating → +38 BPM
  *  - `runningCalls` non-empty → a tool is executing → +52 BPM
  *  - `running` (session turn in flight) → +10 BPM
  *  - otherwise the 10s step-window activity rate sets the base (~42 idle)
- * The BPM target is smoothed with a lerp, so the rhythm accelerates the
- * moment a thought starts and eases back down when the work lands.
+ * The BPM target is smoothed with a lerp; the paper speed stays FIXED and
+ * only the beat density changes — hospital monitor semantics.
  *
- * Perf: the line is drawn by a rAF loop writing SVG attributes directly —
- * React re-renders only on snapshot/tick/resize changes.
+ * Rendering: a single <canvas> redrawn per rAF at full frame rate. Fixed
+ * memory (one canvas the size of the strip), no DOM attribute churn, no
+ * string building — the trace is ~width straight segments per frame, which
+ * is far cheaper than SVG polyline swaps and cannot stutter from throttling.
  */
 import { useEffect, useRef, useState } from 'react'
 import type {
@@ -24,19 +24,17 @@ import type {
 import type { SessionProjectionMap } from '@deepseek-ai/dsh-client-runtime/client'
 // Type-only: merges the sessionStats key into SessionProjectionMap.
 import type {} from '@deepseek-ai/dsh-session-stats/client'
-import { buildEcgFrame, bpmForActivity } from './ecg.ts'
+import { ecgValue } from './ecg.ts'
 import type { ChiralKey } from './locales.ts'
 import { NS } from './locales.ts'
 
 /** Full props: the input-dock runtime seat plus the locale seat. */
 export type HeartLineProps = PropsRuntime<'conversation.input.dock'> & PropsLocale<typeof NS>
 
-/** Monitor view height, user units (= CSS px). */
+/** Monitor view height, CSS px. */
 const ECG_HEIGHT = 22
 /** Seconds of signal shown across the window (fixed paper speed). */
 const ECG_WINDOW = 5
-/** Sampling step, user units. */
-const ECG_STEP = 1
 /** Activity window for the step-rate base, ms. */
 const ACTIVITY_WINDOW_MS = 10_000
 /** Rotating status lines (locale keys), one every STATUS_ROTATE_S ticks. */
@@ -110,7 +108,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const span = first === undefined ? 0 : now - first.t
       const delta = first === undefined ? 0 : lastStepsRef.current - first.steps
       const perMinute = span > 0 ? (delta / span) * 60_000 : 0
-      const base = bpmForActivity(perMinute)
+      const base = Math.min(BPM_CEIL, Math.max(BPM_FLOOR, 42 + perMinute * 6))
       const act = activityRef.current
       const boost = (act.calls > 0 ? BOOST_TOOL : 0)
         + (act.partial ? BOOST_THINKING : 0)
@@ -128,55 +126,98 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     return () => { window.clearInterval(id) }
   }, [])
 
-  // ── ECG line: rAF loop writing SVG attributes directly ────────────────
-  const svgRef = useRef<SVGSVGElement>(null)
-  const lineRef = useRef<SVGPolylineElement>(null)
-  const ghostRef = useRef<SVGPolylineElement>(null)
-  const headRef = useRef<SVGCircleElement>(null)
-  const haloRef = useRef<SVGCircleElement>(null)
+  // ── Canvas trace: one fixed-size canvas, redrawn per rAF ──────────────
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null)
   const widthRef = useRef(640)
-  const [viewBox, setViewBox] = useState(`0 0 640 ${ECG_HEIGHT}`)
+  const dprRef = useRef(1)
 
   useEffect(() => {
-    const svg = svgRef.current
-    if (svg === null) return
+    const canvas = canvasRef.current
+    if (canvas === null) return
+    const ctx = canvas.getContext('2d')
+    if (ctx === null) return
+    ctxRef.current = ctx
+
+    const applySize = (): void => {
+      const dpr = window.devicePixelRatio || 1
+      dprRef.current = dpr
+      canvas.width = Math.max(120, Math.round(widthRef.current * dpr))
+      canvas.height = Math.round(ECG_HEIGHT * dpr)
+    }
+    applySize()
     const observer = new ResizeObserver((entries) => {
       const width = Math.max(120, Math.round(entries[0]?.contentRect.width ?? 640))
       if (width !== widthRef.current) {
         widthRef.current = width
-        setViewBox(`0 0 ${width} ${ECG_HEIGHT}`)
+        applySize()
       }
     })
-    observer.observe(svg)
+    observer.observe(canvas)
 
-    const paintedModeRef = { current: 'idle' as Mode }
     const paint = (now: number): void => {
-      const frame = buildEcgFrame(now, bpmRef.current, widthRef.current, ECG_HEIGHT, ECG_WINDOW, ECG_STEP)
-      lineRef.current?.setAttribute('points', frame.points)
-      ghostRef.current?.setAttribute('points', frame.points)
-      // Trace color follows the live activity mode; write it only when the
-      // mode actually changes (attribute writes on unchanged values still cost).
-      if (modeRef.current !== paintedModeRef.current) {
-        paintedModeRef.current = modeRef.current
-        const stroke = MODE_COLOR[modeRef.current]
-        lineRef.current?.setAttribute('stroke', stroke)
-        headRef.current?.setAttribute('fill', stroke)
-        haloRef.current?.setAttribute('fill', `${stroke}33`)
+      const c = canvasRef.current
+      const g = ctxRef.current
+      if (c === null || g === null) return
+      const w = widthRef.current
+      const h = ECG_HEIGHT
+      const dpr = dprRef.current
+      g.setTransform(dpr, 0, 0, dpr, 0, 0)
+      g.clearRect(0, 0, w, h)
+
+      const tNow = now / 1_000
+      const secondsPerPixel = ECG_WINDOW / w
+      const mid = h / 2
+      const amp = h * 0.44
+      const wander = 0.05 * Math.sin(tNow * 0.6) + 0.035 * Math.sin(tNow * 1.7 + 1.3)
+      const bpm = bpmRef.current
+      const yAt = (x: number): number => {
+        const tX = tNow - (w - x) * secondsPerPixel
+        const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
+        return mid - (ecgValue(phase) + wander) * amp
       }
-      const headX = widthRef.current - 2
-      const headY = frame.headY.toFixed(1)
-      headRef.current?.setAttribute('cx', String(headX))
-      headRef.current?.setAttribute('cy', headY)
-      haloRef.current?.setAttribute('cx', String(headX))
-      haloRef.current?.setAttribute('cy', headY)
+
+      // Chiral ghost: the same trace offset by 3px, faint cyan.
+      g.beginPath()
+      for (let x = 0; x <= w; x += 1) {
+        const y = yAt(x)
+        if (x === 0) g.moveTo(x + 3, y)
+        else g.lineTo(x + 3, y)
+      }
+      g.strokeStyle = 'rgba(111, 219, 226, 0.18)'
+      g.lineWidth = 1
+      g.stroke()
+
+      // Main trace.
+      g.beginPath()
+      for (let x = 0; x <= w; x += 1) {
+        const y = yAt(x)
+        if (x === 0) g.moveTo(x, y)
+        else g.lineTo(x, y)
+      }
+      g.strokeStyle = MODE_COLOR[modeRef.current]
+      g.lineWidth = 1.4
+      g.lineJoin = 'round'
+      g.lineCap = 'round'
+      g.stroke()
+
+      // Scan head: halo + dot at the leading edge.
+      const headY = yAt(w)
+      g.fillStyle = MODE_COLOR[modeRef.current]
+      g.globalAlpha = 0.22
+      g.beginPath()
+      g.arc(w - 2, headY, 5, 0, Math.PI * 2)
+      g.fill()
+      g.globalAlpha = 1
+      g.beginPath()
+      g.arc(w - 2, headY, 1.6, 0, Math.PI * 2)
+      g.fill()
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       paint(performance.now()) // one static frame
       return () => { observer.disconnect() }
     }
-    // No throttling: every rAF paints. A 33ms gate made frame intervals
-    // alternate 16/33/50ms, which reads as stutter on a scrolling trace.
     let raf = 0
     const loop = (now: number): void => {
       raf = requestAnimationFrame(loop)
@@ -198,18 +239,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
         <span className="cp-lineBpmUnit">{t('bpm.unit')}</span>
       </div>
 
-      <svg
-        ref={svgRef}
-        className="cp-lineEcg"
-        viewBox={viewBox}
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <polyline ref={ghostRef} className="cp-lineEcgGhost" transform="translate(3 0)" />
-        <polyline ref={lineRef} className="cp-lineEcgLine" />
-        <circle ref={haloRef} className="cp-lineEcgHeadHalo" cx="638" cy="11" r="5" />
-        <circle ref={headRef} className="cp-lineEcgHead" cx="638" cy="11" r="1.6" />
-      </svg>
+      <canvas ref={canvasRef} className="cp-lineEcg" aria-hidden />
 
       <div className="cp-lineReadout">
         <div className="cp-lineStatus">{t(flavor)}</div>

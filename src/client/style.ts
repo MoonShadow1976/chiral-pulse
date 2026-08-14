@@ -224,32 +224,11 @@ body {
   display: block;
   border-radius: 0;
   border: 1px solid rgba(140, 170, 215, 0.16);
+  /* Static paper grid lives in CSS; the canvas above it only paints the trace. */
   background:
     repeating-linear-gradient(0deg, rgba(140, 170, 215, 0.07) 0 1px, transparent 1px 11px),
     repeating-linear-gradient(90deg, rgba(140, 170, 215, 0.06) 0 1px, transparent 1px 11px),
     rgba(7, 10, 15, 0.55);
-}
-.cp-lineEcgLine {
-  fill: none;
-  stroke: var(--cp-amber);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 3px rgba(255, 180, 84, 0.85)) drop-shadow(0 0 8px rgba(255, 180, 84, 0.4));
-}
-.cp-lineEcgGhost {
-  fill: none;
-  stroke: var(--cp-cyan);
-  stroke-width: 1;
-  opacity: 0.2;
-  filter: drop-shadow(0 0 4px rgba(111, 219, 226, 0.45));
-}
-.cp-lineEcgHead {
-  fill: var(--cp-amber-bright);
-  filter: drop-shadow(0 0 5px rgba(255, 180, 84, 1));
-}
-.cp-lineEcgHeadHalo {
-  fill: rgba(255, 180, 84, 0.2);
 }
 
 .cp-lineReadout {
@@ -272,9 +251,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cp-lineEcgLine,
-  .cp-lineEcgHead {
-    filter: drop-shadow(0 0 2px rgba(255, 180, 84, 0.6));
+  .cp-lineEcg {
+    opacity: 0.9;
   }
 }
 
