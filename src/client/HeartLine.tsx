@@ -28,8 +28,8 @@ import { buildEcgFrame, bpmForActivity } from './ecg.ts'
 import type { ChiralKey } from './locales.ts'
 import { NS } from './locales.ts'
 
-/** Full props: the composer-dock runtime seat plus the locale seat. */
-export type HeartLineProps = PropsRuntime<'conversation.composer.dock'> & PropsLocale<typeof NS>
+/** Full props: the input-dock runtime seat plus the locale seat. */
+export type HeartLineProps = PropsRuntime<'conversation.input.dock'> & PropsLocale<typeof NS>
 
 /** Monitor view height, user units (= CSS px). */
 const ECG_HEIGHT = 22
@@ -39,8 +39,6 @@ const ECG_WINDOW = 5
 const ECG_STEP = 1
 /** Activity window for the step-rate base, ms. */
 const ACTIVITY_WINDOW_MS = 10_000
-/** The DS countdown origin: 19:49:19. */
-const COUNTDOWN_TOTAL = 19 * 3_600 + 49 * 60 + 19
 /** Rotating status lines (locale keys), one every STATUS_ROTATE_S ticks. */
 const STATUS_KEYS: readonly ChiralKey[] = [
   'status.stable', 'status.bonded', 'status.chiral', 'status.doom',
@@ -65,15 +63,6 @@ const MODE_COLOR = {
   run: '#ffc46b',
 } as const
 type Mode = keyof typeof MODE_COLOR
-
-/** HH:MM:SS with zero padding, DS countdown style. */
-function formatCountdown(totalSeconds: number): string {
-  const h = Math.floor(totalSeconds / 3_600)
-  const m = Math.floor((totalSeconds % 3_600) / 60)
-  const s = totalSeconds % 60
-  const pad = (v: number): string => String(v).padStart(2, '0')
-  return `${pad(h)}:${pad(m)}:${pad(s)}`
-}
 
 /** One activity sample: (time, steps) at a projection update. */
 interface StepSample {
@@ -196,7 +185,6 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     }
   }, [])
 
-  const clock = COUNTDOWN_TOTAL - (ui.elapsed % (COUNTDOWN_TOTAL + 1))
   const flavor = STATUS_KEYS[Math.floor(ui.elapsed / STATUS_ROTATE_S) % STATUS_KEYS.length]
 
   return (
@@ -221,9 +209,6 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
 
       <div className="cp-lineReadout">
         <div className="cp-lineStatus">{t(flavor)}</div>
-        <div className="cp-lineClock">
-          {t('clock.label')} {formatCountdown(clock)}
-        </div>
       </div>
     </div>
   )

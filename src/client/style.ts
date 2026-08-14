@@ -201,20 +201,20 @@ body {
 
 .cp-lineBpm {
   flex: none;
-  min-width: 58px;
-  font-size: 13px;
+  min-width: 42px;
+  font-size: 11px;
   line-height: 1;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: var(--cp-amber-bright);
   text-shadow: 0 0 10px rgba(255, 180, 84, 0.5);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .cp-lineBpmUnit {
-  font-size: 8px;
-  letter-spacing: 1.5px;
+  font-size: 7px;
+  letter-spacing: 1px;
   color: var(--cp-dim);
-  margin-left: 3px;
+  margin-left: 2px;
 }
 
 .cp-lineEcg {
@@ -254,12 +254,11 @@ body {
 
 .cp-lineReadout {
   flex: none;
+  width: 132px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 1px;
-  min-width: 118px;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: hidden;
 }
 .cp-lineStatus {
   font-size: 8px;
@@ -267,13 +266,9 @@ body {
   text-transform: uppercase;
   color: var(--cp-cyan);
   white-space: nowrap;
-}
-.cp-lineClock {
-  font-size: 8px;
-  letter-spacing: 1.2px;
-  color: var(--cp-dim);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {

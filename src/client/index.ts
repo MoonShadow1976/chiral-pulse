@@ -75,11 +75,12 @@ export function apply(ctx: ClientContext): void {
     }
   }, 'chiral-pulse: atmosphere')
 
-  ctx.slots.inject('conversation.composer.dock', () => ctx.slots.register({
-    name: 'conversation.composer.dock',
+  ctx.slots.inject('conversation.input.dock', () => ctx.slots.register({
+    name: 'conversation.input.dock',
     id: 'chiral-pulse',
-    // After the stats line: the pulse feed sits under the figures.
-    order: 10,
+    // Above the composer card, under the goal strip: the pulse feed rides
+    // with the input it monitors.
+    order: 20,
     locale: NS,
   }, HeartLine))
 }
