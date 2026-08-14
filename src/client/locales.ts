@@ -20,6 +20,7 @@ export type ChiralKey =
   | 'status.keep'
   | 'status.voidout'
   | 'status.odradek'
+  | 'status.flatline'
 
 /** English dictionary. */
 export const en: Record<ChiralKey, string> = {
@@ -32,6 +33,7 @@ export const en: Record<ChiralKey, string> = {
   'status.keep': 'KEEP ON KEEPING ON',
   'status.voidout': 'NO VOIDOUT DETECTED',
   'status.odradek': 'ODRADEK SYNC: OK',
+  'status.flatline': '♥ FLATLINE',
 }
 
 /** Chinese dictionary. */
@@ -45,4 +47,5 @@ export const zh: Record<ChiralKey, string> = {
   'status.keep': '继续前进 · KEEP ON KEEPING ON',
   'status.voidout': '未检测到虚爆',
   'status.odradek': '奥卓克同步:正常',
+  'status.flatline': '♥ 心脏停跳',
 }
