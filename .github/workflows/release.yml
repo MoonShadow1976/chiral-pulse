@@ -5,6 +5,9 @@ on:
   push:
     tags:
       - 'v*'
+  # Manual trigger: tags created via the REST API do not fire `push` events,
+  # so a network-blocked `git push` can still release through a dispatch.
+  workflow_dispatch: {}
 
 jobs:
   npm:
