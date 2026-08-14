@@ -149,15 +149,20 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
     })
     observer.observe(svg)
 
+    const paintedModeRef = { current: 'idle' as Mode }
     const paint = (now: number): void => {
       const frame = buildEcgFrame(now, bpmRef.current, widthRef.current, ECG_HEIGHT, ECG_WINDOW, ECG_STEP)
       lineRef.current?.setAttribute('points', frame.points)
       ghostRef.current?.setAttribute('points', frame.points)
-      // Trace color follows the live activity mode.
-      const stroke = MODE_COLOR[modeRef.current]
-      lineRef.current?.setAttribute('stroke', stroke)
-      headRef.current?.setAttribute('fill', stroke)
-      haloRef.current?.setAttribute('fill', `${stroke}33`)
+      // Trace color follows the live activity mode; write it only when the
+      // mode actually changes (attribute writes on unchanged values still cost).
+      if (modeRef.current !== paintedModeRef.current) {
+        paintedModeRef.current = modeRef.current
+        const stroke = MODE_COLOR[modeRef.current]
+        lineRef.current?.setAttribute('stroke', stroke)
+        headRef.current?.setAttribute('fill', stroke)
+        haloRef.current?.setAttribute('fill', `${stroke}33`)
+      }
       const headX = widthRef.current - 2
       const headY = frame.headY.toFixed(1)
       headRef.current?.setAttribute('cx', String(headX))
@@ -170,12 +175,11 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       paint(performance.now()) // one static frame
       return () => { observer.disconnect() }
     }
+    // No throttling: every rAF paints. A 33ms gate made frame intervals
+    // alternate 16/33/50ms, which reads as stutter on a scrolling trace.
     let raf = 0
-    let last = 0
     const loop = (now: number): void => {
       raf = requestAnimationFrame(loop)
-      if (now - last < 33) return // ~30 fps
-      last = now
       paint(now)
     }
     raf = requestAnimationFrame(loop)
