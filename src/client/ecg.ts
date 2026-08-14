@@ -24,7 +24,7 @@ export function ecgValue(phase: number): number {
   return (
     bump(phase, 0.14, 0.030, 0.16) // P wave
     - bump(phase, 0.30, 0.011, 0.26) // Q dip
-    + bump(phase, 0.335, 0.012, 1.0) // R spike (wide enough to survive sampling)
+    + bump(phase, 0.335, 0.016, 1.0) // R spike (wide enough to survive sampling)
     - bump(phase, 0.375, 0.011, 0.34) // S dip
     + bump(phase, 0.52, 0.048, 0.26) // T wave
     + bump(phase, 0.80, 0.012, 0.05) // U ripple
