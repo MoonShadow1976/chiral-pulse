@@ -1,5 +1,8 @@
 # CHIRAL PULSE · 手性脉冲
 
+[![npm](https://img.shields.io/npm/v/chiral-pulse)](https://www.npmjs.com/package/chiral-pulse)
+[![GitHub Release](https://img.shields.io/github/v/release/MoonShadow1976/chiral-pulse)](https://github.com/MoonShadow1976/chiral-pulse/releases)
+
 Death Stranding 皮肤 + BB 生命体征监护仪,挂在 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) Web 界面。
 
 - **全局皮肤**——整个界面都是死亡搁浅:暗色 DS 蓝黑机身 + 琥珀发丝线,亮色冥滩白变体;全屏扫描线、手性晶格、四角渐晕氛围层(全部 pointer-transparent,不挡操作);DeepSeek 鲸鱼品牌蓝原样保留。
@@ -58,13 +61,12 @@ pnpm typecheck  # tsc --noEmit
 
 ## 发布
 
-打 tag(`v*.*.*`)→ GitHub Actions 自动构建、发布 npm 并创建 GitHub Release。
+打 tag(`v*.*.*`)→ GitHub Actions 自动构建、发布 npm 并创建 GitHub Release。本仓库已打上 [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题,可在同话题下被发现。
 
 ## 社区与支持
 
-- 欢迎通过 [GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions) 提交反馈或 bug 报告。
-- 为你的插件仓库添加 [`dsh-plugin`](https://github.com/topics/dsh-plugin) 话题,便于被发现。
-- 欢迎加入 DeepSeek Harness 企微群:扫码添加企微小助手并填写入群问卷,完成后小助手会邀请你入群。
+- 反馈与 bug 报告:[GitHub Discussions](https://github.com/deepseek-ai/deepseek-harness/discussions)。
+- 加入 DeepSeek Harness 企微群:扫码添加企微小助手,填写入群问卷后小助手会邀请你入群。
 
 ## License
 
