@@ -39,6 +39,12 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-bg-mask-3: rgba(0, 0, 0, 0.5);
   --dsw-alias-bg-mask-drop: rgba(10, 14, 19, 0.72);
   --dsw-alias-bg-skeleton: rgba(150, 170, 200, 0.07);
+  /* Setting rows / select chips (language, agent preset, model, permissions…)
+     paint from these; without an override they stay the LIGHT theme's
+     near-white and produce white-on-white text. */
+  --dsw-alias-bg-module-platform: rgb(15, 20, 27);
+  --dsw-alias-bg-multi-select: rgb(18, 24, 32);
+  --dsw-alias-fill-tsp-secondary: rgb(18, 24, 32);
 
   /* text: cold blue-grey */
   --dsw-alias-label-primary: rgb(235, 240, 246);
@@ -47,10 +53,12 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-label-caption: rgb(108, 122, 141);
   --dsw-alias-label-dimmed: rgb(94, 108, 127);
   --dsw-alias-label-primary-dimmed: rgb(205, 213, 222);
-  --dsw-alias-label-primary-inverted: rgb(235, 240, 246);
+  --dsw-alias-label-primary-inverted: rgb(20, 26, 35);
   --dsw-alias-label-primary-foreground: rgb(13, 17, 23);
+  --dsw-alias-label-primary-bluish: rgb(200, 214, 232);
   --dsw-alias-brand-text: rgb(235, 240, 246);
   --dsw-alias-brand-primary: rgb(103, 158, 254);
+  --dsw-alias-brand-primary-invert: rgb(235, 240, 246);
 
   /* hairlines: cold blue, readable against the body */
   --dsw-alias-border-l1: rgba(140, 170, 215, 0.15);
@@ -77,6 +85,9 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-button-floating-fill: rgb(19, 25, 33);
   --dsw-alias-button-floating-hover: rgb(24, 31, 41);
   --dsw-alias-button-elevated-fill: rgb(22, 29, 38);
+  /* Contrast fill (attachment rail): pale case + DARK inverted ink — the
+     wordmark badge and toasts also ride label-primary-inverted, so the pair
+     (pale fill, dark ink) stays readable everywhere. */
   --dsw-alias-button-contrast-fill: rgb(205, 213, 222);
   --dsw-alias-button-tool-bar-fill: rgba(140, 170, 215, 0.24);
   --dsw-alias-button-tool-bar-fill-invisible: rgba(140, 170, 215, 0.13);
@@ -222,9 +233,11 @@ body {
 }
 
 .cp-lineEcgWrap {
-  flex: 1 1 auto;
+  /* basis 0 + grow: the paper area takes exactly the flex-allocated width;
+     never shrink (a squeezed strip would shrink the canvas bitmap and make
+     the trace speed depend on the window width). */
+  flex: 1 1 0;
   min-width: 100px;
-  min-height: 22px;
   height: 22px;
   position: relative;
   border-radius: 0;
@@ -442,7 +455,6 @@ body {
    ──────────────────────────────────────────────────────────────────────── */
 [data-composer-seat] textarea {
   caret-color: #ffb454;
-  letter-spacing: 0.01em;
 }
 [data-composer-seat] textarea:focus {
   caret-color: #ffd9a0;
@@ -459,7 +471,10 @@ body {
    Dialogs, menus, tooltips, toasts — the floating DS surfaces
    ──────────────────────────────────────────────────────────────────────── */
 [role="dialog"] {
-  border: 1px solid rgba(255, 180, 84, 0.32) !important;
+  border: 1px solid rgba(255, 180, 84, 0.35) !important;
+  /* Inner hairline frame — the DS double-cased panel. */
+  outline: 1px solid rgba(140, 170, 215, 0.22);
+  outline-offset: -6px;
   border-radius: 0 !important;
   background: linear-gradient(180deg, rgba(15, 20, 27, 0.98), rgba(10, 14, 19, 0.99)) !important;
   box-shadow:
@@ -493,6 +508,42 @@ body {
   );
 }
 
+/* Toast (the only alert portaled straight onto body): DS gold badge —
+   amber case, dark ink, chamfered. Inline error rows keep the dark case
+   above; this rule wins for the fixed top-center banner. */
+body > [role="alert"] {
+  border: 1px solid rgba(255, 196, 120, 0.7) !important;
+  border-radius: 0 !important;
+  background: linear-gradient(180deg, #ffbe6b, #e09a3c) !important;
+  color: rgb(28, 18, 6) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 10px 32px rgba(0, 0, 0, 0.5) !important;
+  clip-path: polygon(
+    10px 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0 100%,
+    0 10px
+  );
+}
+
+/* Session-header action + utility buttons (Session log, jobs…):
+   DS chamfered buttons. Session log lives in .utilities, jobs in .actions. */
+[data-slot="conversation.session.header.actions"] button,
+[data-slot="conversation.session.header.utilities"] button {
+  border-radius: 0 !important;
+  clip-path: polygon(
+    6px 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0 100%,
+    0 6px
+  );
+}
+
 /* ────────────────────────────────────────────────────────────────────────
    Sidebar: DS hairline on the conversation-history column
    ──────────────────────────────────────────────────────────────────────── */
@@ -511,6 +562,19 @@ body {
     calc(100% - 6px) 100%,
     0 100%,
     0 6px
+  );
+}
+
+/* Workspace rows (workspaces, sessions, groups): DS chamfered entries. */
+[role="treeitem"] {
+  border-radius: 0 !important;
+  clip-path: polygon(
+    5px 0,
+    100% 0,
+    100% calc(100% - 5px),
+    calc(100% - 5px) 100%,
+    0 100%,
+    0 5px
   );
 }
 
