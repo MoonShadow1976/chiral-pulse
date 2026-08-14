@@ -101,19 +101,32 @@ function streamingTail(blocks: readonly { kind: string; text?: string }[]): stri
  */
 export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   const stats = useProjection('sessionStats') as SessionProjectionMap['sessionStats'] | undefined
-  // Live activity + real model state: streaming output tail, running tool
-  // name, turn in flight, and the last agent error.
-  const live = useSession(s => ({
-    partial: s.partial !== null,
-    partialText: s.partial === null ? '' : streamingTail(s.partial.blocks),
-    toolName: s.runningCalls[0]?.name ?? null,
-    running: s.running,
-    error: s.lastAgentError,
-    // A failed step waiting on a model retry: the whale flatlines.
-    retrying: s.chat.legacy.nodes.some(
-      n => n.kind === 'model-retry' && n.retryState === 'scheduled',
-    ),
-  }))
+  // One primitive-returning selector per signal: each returns a stable value
+  // (boolean / string / null), so the component only re-renders when that
+  // signal actually changes — a single object selector re-rendered on every
+  // snapshot flush, which is far too often while streaming.
+  const partial = useSession(s => s.partial !== null)
+  const partialText = useSession(s => (s.partial === null ? '' : streamingTail(s.partial.blocks)))
+  const toolName = useSession(s => (s.runningCalls[0]?.name ?? null))
+  const running = useSession(s => s.running)
+  const error = useSession(s => s.lastAgentError)
+  // Flatline only on a LIVE retry stall. The retry chain keeps every attempt;
+  // older attempts can linger in 'scheduled' forever (a retry superseded
+  // without a retry-started event), so only the LAST attempt counts, within a
+  // freshness window — a session merely waiting for user input must never
+  // read as a stopped heart. Back-to-front scan stops at the first retry node
+  // (which is the last one), so cost is O(distance from the tail), not O(n).
+  const retrying = useSession(s => {
+    const nodes = s.chat.legacy.nodes
+    for (let i = nodes.length - 1; i >= 0; i -= 1) {
+      const n = nodes[i]
+      if (n.kind === 'model-retry') {
+        return n.retryState === 'scheduled' && n.time > Date.now() - 120_000
+      }
+    }
+    return false
+  })
+  const live = { partial, partialText, toolName, running, error, retrying }
 
   const steps = stats?.steps ?? 0
 
@@ -240,21 +253,20 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const c = canvasRef.current
       const g = ctxRef.current
       if (c === null || g === null) return
-      // Self-healing size: measure the live layout every frame so any
-      // remount or hero resize is corrected within one frame, and the trace
-      // always fills the visible strip.
-      const dpr = window.devicePixelRatio || 1
-      const rect = c.getBoundingClientRect()
-      const w = Math.max(120, Math.round(rect.width))
-      const h = Math.max(1, Math.round(rect.height))
+      // Size is maintained by the ResizeObserver (widthRef / canvas.width);
+      // paint reads it directly — no per-frame getBoundingClientRect, so no
+      // forced synchronous layout. Fixed logical height keeps the amplitude
+      // independent of the live layout (the first paint once saw height 0 and
+      // collapsed the trace to a flat line).
+      const dpr = dprRef.current
+      const w = widthRef.current
+      const h = ECG_HEIGHT
       const wantW = Math.round(w * dpr)
       const wantH = Math.round(h * dpr)
       if (c.width !== wantW || c.height !== wantH) {
         c.width = wantW
         c.height = wantH
       }
-      widthRef.current = w
-      dprRef.current = dpr
       g.setTransform(dpr, 0, 0, dpr, 0, 0)
       g.clearRect(0, 0, w, h)
 
@@ -262,10 +274,13 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       // Absolute paper speed: px per second is constant, width-independent.
       const secondsPerPixel = 1 / PAPER_SPEED_PX_PER_SECOND
       const mid = h / 2
-      const amp = h * 0.44
+      const amp = h * 0.5
       const wander = 0.05 * Math.sin(tNow * 0.6) + 0.035 * Math.sin(tNow * 1.7 + 1.3)
       const bpm = bpmRef.current
-      const flatline = bpm < 1
+      // Flatline is a MODE, not a smoothed value: as soon as the target is a
+      // stopped heart, draw the line — don't wait for the 6 BPM/s ramp to
+      // cross an arbitrary threshold.
+      const flatline = targetRef.current === 0
 
       // Erase-bar sweep: the bar moves right → left; pixels it has just
       // passed are re-sampled (frozen update), the rest of the image is
@@ -278,8 +293,19 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
       const yNow = (x: number): number => {
         if (flatline) return mid // the whale's heart has stopped — a flat line
         let v = -Infinity
+        // Sweep sample: pixel x is (re)written when the bar crosses it, so the
+        // sample must be anchored to the sweep, not the frame. The frame-time
+        // lookback `tNow - (w - x)·secondsPerPixel` evaluated at a crossing
+        // cancels its own offset — the bar reaches x exactly (w - x) px into
+        // the sweep, so the lookback always lands on the sweep-start instant
+        // k·sweepPeriod and EVERY swept pixel receives the SAME sample → the
+        // trace flattens to one level once the bar has crossed the strip.
+        // Anchoring to the sweep start (`(tNow - tInSweep) - (w - x)·spp`, with
+        // tNow - tInSweep = k·sweepPeriod) keeps the right edge pinned to the
+        // sweep start ("now") and each pixel's sample x-dependent — the swept
+        // region redraws as a real, time-normal waveform window.
         for (let i = 0; i < 4; i += 1) {
-          const tX = tNow - (w - (x + i * 0.25)) * secondsPerPixel
+          const tX = (tNow - tInSweep) - (w - (x + i * 0.25)) * secondsPerPixel
           const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
           const s = ecgValue(phase)
           if (s > v) v = s
@@ -297,8 +323,13 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
           traceCache[x] = yNow(x)
         }
         lastScanX = scanXInt
+      } else if (lastScanX < scanXInt) {
+        // Wrap: the bar jumped back to the right edge. Refresh its new head
+        // pixel so the trace continues from the current instant instead of
+        // leaving stale data at the right edge (the reported seam).
+        traceCache[scanXInt] = yNow(scanXInt)
+        lastScanX = scanXInt
       } else {
-        // Sweep reset (bar jumped back to the right): no pixels refreshed.
         lastScanX = scanXInt
       }
 
@@ -364,7 +395,7 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
           : t(flavor)
 
   return (
-    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode} data-rev="18">
+    <div className="cp-line" role="group" aria-label={t('line.aria')} data-chiral-pulse data-mode={ui.mode} data-rev="20">
       <div className="cp-lineBpm">
         {ui.bpm}
       </div>
