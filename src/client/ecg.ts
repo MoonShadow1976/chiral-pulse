@@ -24,7 +24,7 @@ export function ecgValue(phase: number): number {
   return (
     bump(phase, 0.14, 0.030, 0.16) // P wave
     - bump(phase, 0.30, 0.011, 0.26) // Q dip
-    + bump(phase, 0.335, 0.0075, 1.0) // R spike
+    + bump(phase, 0.335, 0.012, 1.0) // R spike (wide enough to survive sampling)
     - bump(phase, 0.375, 0.011, 0.34) // S dip
     + bump(phase, 0.52, 0.048, 0.26) // T wave
     + bump(phase, 0.80, 0.012, 0.05) // U ripple
@@ -77,10 +77,17 @@ export function buildEcgFrame(
   let headY = mid
   for (let x = 0; x <= width; x += step) {
     // x → absolute time: the right edge is "now", leftward is the past at a
-    // constant rate.
+    // constant rate. Sub-step peak guard: also sample the midpoints so a
+    // narrow R spike between two samples still paints at full height.
     const tX = tNow - (width - x) * secondsPerPixel
     const phase = ((tX * (bpm / 60)) % 1 + 1) % 1
-    const y = mid - (ecgValue(phase) + wander) * amp
+    let v = ecgValue(phase)
+    if (step > 1) {
+      const tMid = tX - secondsPerPixel * step * 0.5
+      const phaseMid = ((tMid * (bpm / 60)) % 1 + 1) % 1
+      v = Math.max(v, ecgValue(phaseMid))
+    }
+    const y = mid - (v + wander) * amp
     points.push(`${x.toFixed(1)},${y.toFixed(1)}`)
     if (x === width - step) headY = y
   }

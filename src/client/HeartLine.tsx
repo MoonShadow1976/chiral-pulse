@@ -36,7 +36,7 @@ const ECG_HEIGHT = 22
 /** Seconds of signal shown across the window (fixed paper speed). */
 const ECG_WINDOW = 5
 /** Sampling step, user units. */
-const ECG_STEP = 2
+const ECG_STEP = 1
 /** Activity window for the step-rate base, ms. */
 const ACTIVITY_WINDOW_MS = 10_000
 /** The DS countdown origin: 19:49:19. */

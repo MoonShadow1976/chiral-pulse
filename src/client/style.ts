@@ -464,53 +464,6 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     inset 0 -12px 30px rgba(0, 0, 0, 0.25);
   border-radius: 0;
-  clip-path: polygon(
-    10px 0,
-    100% 0,
-    100% calc(100% - 10px),
-    calc(100% - 10px) 100%,
-    0 100%,
-    0 10px
-  );
-}
-
-/* ────────────────────────────────────────────────────────────────────────
-   Conversation message panels — every turn becomes a DS case
-   ──────────────────────────────────────────────────────────────────────── */
-[data-chat-flow-kind="assistant"],
-[data-chat-flow-kind="user"],
-[data-chat-flow-kind="steering"],
-[data-chat-flow-kind="context"],
-[data-chat-flow-kind="compaction"],
-[data-chat-flow-kind="command"] {
-  background:
-    linear-gradient(115deg, rgba(140, 190, 255, 0.07) 0%, transparent 32%),
-    linear-gradient(180deg, rgba(18, 24, 32, 0.66), rgba(13, 18, 25, 0.72));
-  border: 1px solid rgba(140, 170, 215, 0.2);
-  border-radius: 0;
-  margin: 6px 0;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    inset 0 0 20px rgba(103, 158, 254, 0.05);
-  /* DS chamfer: 45° cuts at the top-left and bottom-right corners. */
-  clip-path: polygon(
-    9px 0,
-    100% 0,
-    100% calc(100% - 9px),
-    calc(100% - 9px) 100%,
-    0 100%,
-    0 9px
-  );
-}
-[data-chat-flow-kind="assistant"] {
-  padding: 8px 10px 8px 18px;
-}
-[data-chat-flow-kind="user"],
-[data-chat-flow-kind="steering"] {
-  padding: 8px 18px 8px 10px;
-}
-[data-chat-flow-kind="context"] {
-  padding: 6px 10px 6px 16px;
 }
 
 /* ────────────────────────────────────────────────────────────────────────
@@ -523,27 +476,11 @@ body {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.07),
     inset 0 0 26px rgba(103, 158, 254, 0.06) !important;
-  clip-path: polygon(
-    12px 0,
-    100% 0,
-    100% calc(100% - 12px),
-    calc(100% - 12px) 100%,
-    0 100%,
-    0 12px
-  );
 }
 [role="menu"] {
   border: 1px solid rgba(140, 170, 215, 0.3) !important;
   border-radius: 0 !important;
   background: rgba(13, 18, 25, 0.97) !important;
-  clip-path: polygon(
-    8px 0,
-    100% 0,
-    100% calc(100% - 8px),
-    calc(100% - 8px) 100%,
-    0 100%,
-    0 8px
-  );
 }
 [role="menuitem"]:hover {
   background: rgba(255, 180, 84, 0.08) !important;
@@ -552,14 +489,6 @@ body {
   border: 1px solid rgba(140, 170, 215, 0.32) !important;
   border-radius: 0 !important;
   background: rgba(15, 20, 27, 0.97) !important;
-  clip-path: polygon(
-    6px 0,
-    100% 0,
-    100% calc(100% - 6px),
-    calc(100% - 6px) 100%,
-    0 100%,
-    0 6px
-  );
 }
 [role="alert"] {
   border: 1px solid rgba(255, 180, 84, 0.38) !important;
