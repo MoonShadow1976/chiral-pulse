@@ -130,6 +130,9 @@ body:not([data-ds-dark-theme]) {
   --dsw-alias-state-success-primary: rgb(52, 205, 168);
   --dsw-alias-state-success-secondary: rgb(94, 222, 189);
   --dsw-alias-state-success-tertiary: rgb(12, 28, 24);
+  /* Business tint (hero "preview" badge et al.): dark case so the pale
+     primary-bluish ink stays readable — the light-theme default is near-white. */
+  --dsw-alias-state-business-tertiary: rgb(26, 34, 46);
   --dsw-static-green-400: rgb(94, 222, 189);
   --dsw-static-green-500: rgb(52, 205, 168);
 }
@@ -215,21 +218,19 @@ body {
 }
 
 .cp-lineBpm {
+  /* Fixed width: a 3-digit readout (42 → 150) must not widen the block and
+     squeeze the paper area — that would shrink the trace window and pull the
+     left edge rightward as the rate climbs. */
   flex: none;
-  min-width: 42px;
-  font-size: 11px;
+  width: 48px;
+  text-align: center;
+  font-size: 16px;
   line-height: 1;
   letter-spacing: 0.5px;
   color: var(--cp-amber-bright);
   text-shadow: 0 0 10px rgba(255, 180, 84, 0.5);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
-.cp-lineBpmUnit {
-  font-size: 7px;
-  letter-spacing: 1px;
-  color: var(--cp-dim);
-  margin-left: 2px;
 }
 
 .cp-lineEcgWrap {
@@ -459,11 +460,9 @@ body {
 [data-composer-seat] textarea:focus {
   caret-color: #ffd9a0;
 }
+/* Composer seat: squared, no extra frame — a visible outline on the big hero
+   card read as a jarring border. */
 [data-composer-seat] {
-  box-shadow:
-    inset 0 0 0 1px rgba(140, 170, 215, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -12px 30px rgba(0, 0, 0, 0.25);
   border-radius: 0;
 }
 
