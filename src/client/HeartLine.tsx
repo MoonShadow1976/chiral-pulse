@@ -21,7 +21,9 @@ import { useEffect, useRef, useState } from 'react'
 import type {
   PropsLocale, PropsRuntime,
 } from '@deepseek-ai/dsh-client-ui-slots'
-import type { SessionProjectionMap } from '@deepseek-ai/dsh-client-runtime/client'
+// Session lifecycle and Chat are separate standard sources in current DSH.
+import type {} from '@deepseek-ai/dsh-client-ui-session/client'
+import type {} from '@deepseek-ai/dsh-client-ui-chat/client'
 // Type-only: merges the sessionStats key into SessionProjectionMap.
 import type {} from '@deepseek-ai/dsh-session-stats/client'
 import { ecgValue } from './ecg.ts'
@@ -96,18 +98,18 @@ function streamingTail(blocks: readonly { kind: string; text?: string }[]): stri
 
 /**
  * The CHIRAL PULSE dock entry.
- * @param props - runtime seat (useSession, useProjection) plus the locale seat.
+ * @param props - Session lifecycle, Chat, projection hooks, and locale seat.
  * @returns the monitor strip.
  */
-export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
-  const stats = useProjection('sessionStats') as SessionProjectionMap['sessionStats'] | undefined
+export function HeartLine({ useSession, useChat, useProjection, t }: HeartLineProps) {
+  const stats = useProjection('sessionStats')
   // One primitive-returning selector per signal: each returns a stable value
   // (boolean / string / null), so the component only re-renders when that
   // signal actually changes — a single object selector re-rendered on every
   // snapshot flush, which is far too often while streaming.
-  const partial = useSession(s => s.partial !== null)
-  const partialText = useSession(s => (s.partial === null ? '' : streamingTail(s.partial.blocks)))
-  const toolName = useSession(s => (s.runningCalls[0]?.name ?? null))
+  const partial = useChat(s => s.legacy.partial !== null)
+  const partialText = useChat(s => (s.legacy.partial === null ? '' : streamingTail(s.legacy.partial.blocks)))
+  const toolName = useChat(s => (s.legacy.runningCalls[0]?.name ?? null))
   const running = useSession(s => s.running)
   const error = useSession(s => s.lastAgentError)
   // Flatline only on a LIVE retry stall. The retry chain keeps every attempt;
@@ -116,8 +118,8 @@ export function HeartLine({ useSession, useProjection, t }: HeartLineProps) {
   // freshness window — a session merely waiting for user input must never
   // read as a stopped heart. Back-to-front scan stops at the first retry node
   // (which is the last one), so cost is O(distance from the tail), not O(n).
-  const retrying = useSession(s => {
-    const nodes = s.chat.legacy.nodes
+  const retrying = useChat(s => {
+    const nodes = s.legacy.nodes
     for (let i = nodes.length - 1; i >= 0; i -= 1) {
       const n = nodes[i]
       if (n.kind === 'model-retry') {

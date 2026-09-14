@@ -16,10 +16,12 @@
  * ride one owned <style data-plugin> tag so the loader removes them on
  * unload/reload.
  */
-import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
+import type { Context as ClientContext } from '@deepseek-ai/cordis'
+// Type-only: the renderer now owns ctx.slots.
+import type {} from '@deepseek-ai/dsh-client-ui-renderer/client'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
 import type {} from '@deepseek-ai/dsh-client-locale/client'
-// Type-only: pulls the ui-conversation SlotMap merge (the composer.dock entry).
+// Type-only: pulls the conversation.input.dock SlotMap declaration.
 import type {} from '@deepseek-ai/dsh-client-ui-conversation/client'
 import { HeartLine } from './HeartLine.tsx'
 import { en, NS, zh, type ChiralKey } from './locales.ts'
