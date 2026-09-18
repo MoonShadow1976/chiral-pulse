@@ -10,6 +10,8 @@ Death Stranding 皮肤 + BB 生命体征监护仪,挂在 [DeepSeek Harness](http
 
 ![CHIRAL PULSE](assets/chiral-pulse-hero.png)
 
+> 如果你是本地源码运行 DSH（`pnpm dsh web`），下面所有命令都把开头 `dsh` 替换成 `pnpm dsh` 执行。
+
 ## 安装
 
 发布版(推荐):
@@ -37,6 +39,13 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modul
 ```
 
 用户 patch 层热加载:无需重启 `dsh web`,刷新浏览器页面即可生效。
+
+
+### 更新
+
+```sh
+dsh plugin --profile web update chiral-pulse
+```
 
 ### 卸载
 
