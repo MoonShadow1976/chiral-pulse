@@ -41,13 +41,13 @@ New-Item -ItemType Junction -Path "$env:USERPROFILE\.dsh\profiles\web\node_modul
 用户 patch 层热加载:无需重启 `dsh web`,刷新浏览器页面即可生效。
 
 
-### 更新
+## 更新
 
 ```sh
 dsh plugin --profile web update chiral-pulse
 ```
 
-### 卸载
+## 卸载
 
 ```sh
 dsh plugin --profile web remove chiral-pulse
