@@ -34,6 +34,14 @@ function findEdge() {
 
 const OUT = process.argv[2] ?? path.join(__dirname, '..', 'assets', 'chiral-pulse-hero.png')
 const NEW_SESSION = process.argv.includes('--new-session')
+/**
+ * The app URL to open. `dsh web` requires browser authentication: a fresh
+ * browser profile holds no session cookie, so it must arrive through the
+ * process token exactly once. Pass the tokenized URL dsh web printed as
+ * DSH_URL to capture an authenticated page; the bare loopback URL only works
+ * from a profile that already has the cookie.
+ */
+const URL_TO_OPEN = process.env.DSH_URL ?? 'http://127.0.0.1:3080/'
 
 ;(async () => {
   const browser = await chromium.launch({
@@ -45,7 +53,18 @@ const NEW_SESSION = process.argv.includes('--new-session')
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 2,
   })
-  await page.goto('http://127.0.0.1:3080/', { waitUntil: 'domcontentloaded', timeout: 60000 })
+  await page.goto(URL_TO_OPEN, { waitUntil: 'domcontentloaded', timeout: 60000 })
+  // A fresh browser profile has no session cookie, so the server answers its
+  // minimal auth wall instead of the app. Reporting that as "plugin may not
+  // have activated" would send the reader hunting the wrong bug, so name it.
+  const wall = await page.evaluate(() => document.body.innerText.trim())
+  if (wall.includes('authentication required')) {
+    console.error('FAIL: dsh web authentication required — this browser has no session cookie.')
+    console.error('  Open the URL printed by `dsh web` (it carries ?token=… once) in a browser,')
+    console.error('  or pass that tokenized URL as DSH_URL. Nothing was captured.')
+    await browser.close()
+    process.exit(2)
+  }
   // Wait for the plugin to paint its heartbeat strip.
   await page.waitForSelector('.cp-line', { timeout: 30000 }).catch(() => {
     console.warn('WARN: .cp-line not found — plugin may not have activated')
