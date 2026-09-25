@@ -1,5 +1,4 @@
 node_modules/
-lib/
 *.log
 .DS_Store
 # Local-only typecheck config (absolute paths to a dev checkout) — never publish.

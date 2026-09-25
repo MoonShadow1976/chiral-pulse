@@ -24,6 +24,14 @@ dsh plugin --profile web add chiral-pulse
 
 旧写法 `dsh plugin --profile web chiral-pulse`(无 `add`)一并保留。
 
+也可以直接从 GitHub 装:
+
+```sh
+dsh plugin --profile web add github:MoonShadow1976/chiral-pulse
+```
+
+仓库里提交了构建产物 `lib/`(见 [`lib/` 为什么要进版本库](#lib-为什么要进版本库)),所以 git 直装能拿到 `package.json` 声明的入口。想锁版本就加分支出处的后缀,例如 `github:MoonShadow1976/chiral-pulse#v1.3.3`。
+
 ### 本地开发安装
 
 把包链接进 profile 的 `node_modules`,再在 `$DSH_HOME/profiles/web/cordis.patch.yml` 追加一行:
@@ -60,7 +68,16 @@ dsh plugin --profile web remove chiral-pulse
 ```sh
 pnpm bundle     # tsdown → lib/index.js + lib/client.js
 pnpm typecheck  # tsc --noEmit
+pnpm test       # bundle + node --test tests/*.test.cjs
 ```
+
+### `lib/` 为什么要进版本库
+
+`lib/` 是构建产物,但它必须跟着源码一起提交。
+
+DSH 装插件走的是包管理器的 git 依赖(`dsh plugin --profile web add github:...`),pnpm 把仓库原样取下来就结束,**不会执行任何构建脚本**。而 `package.json` 的 `main` 与 `exports["./client"]` 指向 `lib/index.js` 和 `lib/client.js` —— 这两个文件不在版本库里,装出来的包就既没有宿主入口也没有浏览器半边:宿主行照样挂在 cordis 树里(空 `apply`,不报错),浏览器端却永远不会注册心跳走纸,现象就是"装成功了但界面上什么都没有"。
+
+构建产物约 102 KB(`client.js` + `client.js.map` + `index.js`),所以直接提交是划算的:git 直装与 npm 安装从此等价。修订产物时永远改 `src/` 再跑 `pnpm bundle`,不要手改 `lib/`;CI(`.github/workflows/ci.yml`)会重新构建并比对提交内容,不一致就失败。
 
 ## 工作原理
 
@@ -71,6 +88,8 @@ pnpm typecheck  # tsc --noEmit
 ## 发布
 
 打 tag(`v*.*.*`)→ GitHub Actions 自动构建、发布 npm 并创建 GitHub Release。
+
+> 打 tag 前先在 `main` 上跑 `pnpm bundle` 并提交 `lib/`:release job 会重新构建并与该 tag 里提交的产物比对,不一致直接失败,避免 tag 的源码与它自己的入口文件不一致。
 
 ## 社区与支持
 

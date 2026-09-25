@@ -1,0 +1,57 @@
+# Continuous integration: keep the committed lib/ artifacts honest.
+#
+# lib/ is a build output committed on purpose (see .gitattributes) so a git
+# install — `dsh plugin --profile web add <github-url>` — carries the entry
+# points package.json declares. That only stays true while the committed copy
+# matches src/, so every change rebuilds and diffs it here.
+name: ci
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch: {}
+
+jobs:
+  lib-in-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Same constraint as the release job: tsdown must resolve from the
+      # project's node_modules, but the `workspace:` protocol in the
+      # @deepseek-ai devDependencies and peerDependencies only resolves inside
+      # the harness monorepo. Drop both, install tsdown alone, restore the real
+      # manifest afterwards.
+      - name: Rebuild lib/ from src/
+        run: |
+          npm pkg delete devDependencies peerDependencies
+          npm install --no-save --no-audit --no-fund tsdown@0.22.2
+          npx tsdown
+          git checkout -- package.json
+
+      # A fresh checkout must already contain the built entry points: an
+      # untracked lib/ is exactly the bug this guards against.
+      - name: Committed lib/ exists
+        run: |
+          for f in lib/index.js lib/client.js; do
+            git ls-files --error-unmatch "$f" >/dev/null 2>&1 || {
+              echo "::error::$f is not tracked — commit the build output (pnpm bundle)"
+              exit 1
+            }
+          done
+
+      - name: Committed lib/ matches src/
+        run: |
+          if ! git diff --quiet -- lib; then
+            echo "::error::lib/ is stale — run 'pnpm bundle' and commit the result"
+            git --no-pager diff --stat -- lib
+            exit 1
+          fi
+          echo "lib/ is in sync with src/"

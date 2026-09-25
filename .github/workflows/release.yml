@@ -36,6 +36,19 @@ jobs:
           npx tsdown
           git checkout -- package.json
 
+      # This job publishes from a tag, which may sit behind main. Rebuild and
+      # compare against the COMMITTED lib/ that a git install receives, so a
+      # tagged checkout can never ship source that disagrees with its own
+      # entry points.
+      - name: Verify committed lib/ matches this tag
+        run: |
+          if ! git diff --quiet -- lib; then
+            echo "::error::lib/ committed at ${GITHUB_REF_NAME} does not match src/ — run 'pnpm bundle' and commit it before tagging"
+            git --no-pager diff --stat -- lib
+            exit 1
+          fi
+          echo "committed lib/ matches src/"
+
       - name: Publish to npm
         run: npm publish --access public
         env:
